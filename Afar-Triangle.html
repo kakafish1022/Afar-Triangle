@@ -375,153 +375,153 @@
     }
 
     function gcd(a, b) {
-      while (b !== 0) {
-        const t = b;
-        b = a % b;
-        a = t;
+    // Generate levels on-demand with caching so mobile page opens instantaneously
+    const LEVEL_CACHE = {};
+
+    function generateSingleLevel(lv) {
+      if (LEVEL_CACHE[lv]) return LEVEL_CACHE[lv];
+
+      const rng = createSeededRng(2026000 + lv * 7919);
+
+      // Keep comfortable 4x4 grid across all 50 levels for crisp mobile touch
+      const gridSize = 4;
+
+      // Optimal steps scale from 2 up to 6 for rich detour puzzles on 4x4
+      let optimalSteps = 2;
+      if (lv >= 7 && lv <= 16) optimalSteps = 3;
+      else if (lv >= 17 && lv <= 30) optimalSteps = 4;
+      else if (lv >= 31 && lv <= 42) optimalSteps = 5;
+      else if (lv >= 43) optimalSteps = 6;
+
+      let built = null;
+
+      for (let attempt = 0; attempt < 150 && !built; attempt++) {
+        const start = {
+          x: Math.floor(rng() * gridSize),
+          y: Math.floor(rng() * gridSize)
+        };
+
+        const path = [start];
+        const usedNodes = new Set([pointKey(start)]);
+        const usedRadicals = new Set();
+
+        for (let step = 0; step < optimalSteps; step++) {
+          const curr = path[path.length - 1];
+          const candidates = [];
+          let totalWeight = 0;
+
+          for (let nx = 0; nx < gridSize; nx++) {
+            for (let ny = 0; ny < gridSize; ny++) {
+              const kStr = `${nx},${ny}`;
+              if (usedNodes.has(kStr)) continue;
+              const distSq = (nx - curr.x) ** 2 + (ny - curr.y) ** 2;
+              if (distSq === 0 || distSq > 18) continue;
+              const rad = simplifyRadical(distSq);
+              const weight = usedRadicals.has(rad.m) ? 1 : 4;
+              totalWeight += weight;
+              candidates.push({ x: nx, y: ny, m: rad.m, cumWeight: totalWeight });
+            }
+          }
+
+          if (candidates.length === 0) break;
+          const rWeight = rng() * totalWeight;
+          let pick = candidates[candidates.length - 1];
+          for (let i = 0; i < candidates.length; i++) {
+            if (rWeight < candidates[i].cumWeight) {
+              pick = candidates[i];
+              break;
+            }
+          }
+          path.push({ x: pick.x, y: pick.y });
+          usedNodes.add(pointKey(pick));
+          usedRadicals.add(pick.m);
+        }
+
+        if (path.length !== optimalSteps + 1) continue;
+
+        const goal = path[path.length - 1];
+        const directTerms = computePathRadicalMap([start, goal]);
+        const targetTerms = computePathRadicalMap(path);
+        if (areRadicalMapsEqual(directTerms, targetTerms)) continue;
+
+        const maxObstacles = Math.min(
+          4,
+          Math.floor((lv - 1) / 8) + 1
+        );
+        const obstacles = [];
+        const blockedSet = new Set();
+
+        const freeCells = [];
+        for (let x = 0; x < gridSize; x++) {
+          for (let y = 0; y < gridSize; y++) {
+            if (!usedNodes.has(`${x},${y}`)) {
+              freeCells.push({ x, y });
+            }
+          }
+        }
+
+        for (let i = freeCells.length - 1; i > 0; i--) {
+          const j = Math.floor(rng() * (i + 1));
+          [freeCells[i], freeCells[j]] = [freeCells[j], freeCells[i]];
+        }
+
+        for (const cell of freeCells) {
+          if (obstacles.length >= maxObstacles) break;
+          const testBlocked = new Set(blockedSet);
+          testBlocked.add(pointKey(cell));
+
+          let blocksSolution = false;
+          for (let i = 0; i < path.length - 1; i++) {
+            if (segmentHitsObstacle(path[i], path[i + 1], testBlocked)) {
+              blocksSolution = true;
+              break;
+            }
+          }
+
+          if (!blocksSolution) {
+            blockedSet.add(pointKey(cell));
+            obstacles.push({
+              x: cell.x,
+              y: cell.y,
+              type: obstacles.length % 2 === 0 ? 'rock' : 'lake'
+            });
+          }
+        }
+
+        built = {
+          level: lv,
+          gridSize,
+          start,
+          goal,
+          obstacles,
+          optimalSteps,
+          maxSteps: optimalSteps + 2,
+          targetTerms,
+          targetFormula: formatRadicalMap(targetTerms),
+          solutionPath: path
+        };
       }
-      return a || 1;
+
+      if (!built) {
+        const path = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }];
+        const targetTerms = computePathRadicalMap(path);
+        built = {
+          level: lv,
+          gridSize: 4,
+          start: path[0],
+          goal: path[2],
+          obstacles: [{ x: 1, y: 0, type: 'rock' }],
+          optimalSteps: 2,
+          maxSteps: 4,
+          targetTerms,
+          targetFormula: formatRadicalMap(targetTerms),
+          solutionPath: path
+        };
+      }
+
+      LEVEL_CACHE[lv] = built;
+      return built;
     }
-
-    // Generate all 50 levels deterministically on a mobile-friendly 4x4 grid
-    const LEVELS = [];
-
-    (function buildAllLevels() {
-      for (let lv = 1; lv <= TOTAL_LEVELS; lv++) {
-        const rng = createSeededRng(2026000 + lv * 7919);
-
-        // Keep comfortable 4x4 grid across all 50 levels for crisp mobile touch
-        const gridSize = 4;
-
-        // Optimal steps scale from 2 up to 6 for rich detour puzzles on 4x4
-        let optimalSteps = 2;
-        if (lv >= 7 && lv <= 16) optimalSteps = 3;
-        else if (lv >= 17 && lv <= 30) optimalSteps = 4;
-        else if (lv >= 31 && lv <= 42) optimalSteps = 5;
-        else if (lv >= 43) optimalSteps = 6;
-
-        let built = null;
-
-        for (let attempt = 0; attempt < 250 && !built; attempt++) {
-          const start = {
-            x: Math.floor(rng() * gridSize),
-            y: Math.floor(rng() * gridSize)
-          };
-
-          const path = [start];
-          const usedNodes = new Set([pointKey(start)]);
-          const usedRadicals = new Set();
-
-          for (let step = 0; step < optimalSteps; step++) {
-            const curr = path[path.length - 1];
-            const candidates = [];
-
-            for (let nx = 0; nx < gridSize; nx++) {
-              for (let ny = 0; ny < gridSize; ny++) {
-                const kStr = `${nx},${ny}`;
-                if (usedNodes.has(kStr)) continue;
-                const distSq = (nx - curr.x) ** 2 + (ny - curr.y) ** 2;
-                if (distSq === 0 || distSq > 18) continue;
-                const rad = simplifyRadical(distSq);
-                const weight = usedRadicals.has(rad.m) ? 1 : 4;
-                for (let w = 0; w < weight; w++) {
-                  candidates.push({ x: nx, y: ny, m: rad.m });
-                }
-              }
-            }
-
-            if (candidates.length === 0) break;
-            const pick = candidates[Math.floor(rng() * candidates.length)];
-            path.push({ x: pick.x, y: pick.y });
-            usedNodes.add(pointKey(pick));
-            usedRadicals.add(pick.m);
-          }
-
-          if (path.length !== optimalSteps + 1) continue;
-
-          const goal = path[path.length - 1];
-          const directTerms = computePathRadicalMap([start, goal]);
-          const targetTerms = computePathRadicalMap(path);
-          if (areRadicalMapsEqual(directTerms, targetTerms)) continue;
-
-          const maxObstacles = Math.min(
-            4,
-            Math.floor((lv - 1) / 8) + 1
-          );
-          const obstacles = [];
-          const blockedSet = new Set();
-
-          const freeCells = [];
-          for (let x = 0; x < gridSize; x++) {
-            for (let y = 0; y < gridSize; y++) {
-              if (!usedNodes.has(`${x},${y}`)) {
-                freeCells.push({ x, y });
-              }
-            }
-          }
-
-          for (let i = freeCells.length - 1; i > 0; i--) {
-            const j = Math.floor(rng() * (i + 1));
-            [freeCells[i], freeCells[j]] = [freeCells[j], freeCells[i]];
-          }
-
-          for (const cell of freeCells) {
-            if (obstacles.length >= maxObstacles) break;
-            const testBlocked = new Set(blockedSet);
-            testBlocked.add(pointKey(cell));
-
-            let blocksSolution = false;
-            for (let i = 0; i < path.length - 1; i++) {
-              if (segmentHitsObstacle(path[i], path[i + 1], testBlocked)) {
-                blocksSolution = true;
-                break;
-              }
-            }
-
-            if (!blocksSolution) {
-              blockedSet.add(pointKey(cell));
-              obstacles.push({
-                x: cell.x,
-                y: cell.y,
-                type: obstacles.length % 2 === 0 ? 'rock' : 'lake'
-              });
-            }
-          }
-
-          built = {
-            level: lv,
-            gridSize,
-            start,
-            goal,
-            obstacles,
-            optimalSteps,
-            maxSteps: optimalSteps + 2,
-            targetTerms,
-            targetFormula: formatRadicalMap(targetTerms),
-            solutionPath: path
-          };
-        }
-
-        if (!built) {
-          const path = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }];
-          const targetTerms = computePathRadicalMap(path);
-          built = {
-            level: lv,
-            gridSize: 4,
-            start: path[0],
-            goal: path[2],
-            obstacles: [{ x: 1, y: 0, type: 'rock' }],
-            optimalSteps: 2,
-            maxSteps: 4,
-            targetTerms,
-            targetFormula: formatRadicalMap(targetTerms),
-            solutionPath: path
-          };
-        }
-
-        LEVELS.push(built);
-      }
-    })();
 
     // =========================================================================
     // 4. GAME STATE & SOUND FEEDBACK
@@ -568,7 +568,8 @@
     // 5. LEVEL LOADING, STAR EVALUATION & UI RENDERING
     // =========================================================================
     function getLevelConfig(lvNum) {
-      return LEVELS[Math.min(TOTAL_LEVELS, Math.max(1, lvNum)) - 1];
+      const clamped = Math.min(TOTAL_LEVELS, Math.max(1, lvNum));
+      return generateSingleLevel(clamped);
     }
 
     function getTotalStarsCount() {
@@ -596,7 +597,7 @@
       const maxUnlocked = getMaxUnlockedLevel();
 
       for (let lv = 1; lv <= TOTAL_LEVELS; lv++) {
-        const cfg = getLevelConfig(lv);
+        const gridSize = 4;
         const earned = Math.min(3, Math.max(0, Number(saveState.stars[lv]) || 0));
         const isCurrent = lv === currentLevelNum;
         const isUnlocked = lv <= maxUnlocked;
@@ -629,7 +630,7 @@
           ).join('');
 
           btn.innerHTML = `
-            <span class="leading-none">${lv} <span class="text-[10px] opacity-75">${cfg.gridSize}×</span></span>
+            <span class="leading-none">${lv} <span class="text-[10px] opacity-75">${gridSize}×</span></span>
             <span class="text-[10px] leading-tight mt-0.5 tracking-tighter">${starsHtml}</span>
           `;
           btn.onclick = () => loadLevel(lv);
