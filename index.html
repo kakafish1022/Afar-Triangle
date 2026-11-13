@@ -208,6 +208,13 @@
           提示訊息
         </div>
 
+        <!-- Custom Brand Mark Badge (Bottom-Left) -->
+        <div class="pointer-events-none absolute bottom-2.5 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-950/75 border border-amber-500/30 text-[11px] sm:text-xs font-black tracking-wider text-amber-300/95 backdrop-blur-sm shadow-md">
+          <img id="custom-mark-img" src="image/mark.png" alt="" class="hidden w-4 h-4 object-contain rounded-sm" onload="this.classList.remove('hidden'); document.getElementById('default-mark-icon').classList.add('hidden');" onerror="this.remove();" />
+          <span id="default-mark-icon" class="text-amber-400 text-[10px]">◈</span>
+          <span>貳餘</span>
+        </div>
+
         <!-- Legend Badge inside Canvas -->
         <div class="pointer-events-none absolute bottom-2.5 right-3 flex items-center gap-2.5 px-2.5 py-1 rounded-full bg-slate-950/75 border border-amber-500/25 text-[10px] sm:text-[11px] text-amber-100/90 backdrop-blur-sm">
           <span>🦁 小獅</span>
@@ -1489,18 +1496,18 @@
 
           if (isEnd && !isHead) {
             ctx.beginPath();
-            ctx.arc(px, py, baseDotRadius + 7, 0, Math.PI * 2);
+            ctx.arc(px, py, baseDotRadius + 13, 0, Math.PI * 2);
             ctx.fillStyle = 'rgba(16, 185, 129, 0.25)';
             ctx.fill();
             ctx.strokeStyle = '#34d399';
-            ctx.lineWidth = 1.8;
+            ctx.lineWidth = 2;
             ctx.stroke();
 
             if (CUSTOM_SPRITES.palm.ready && CUSTOM_SPRITES.palm.img) {
-              const iconSize = gridSize >= 8 ? 24 : 28;
+              const iconSize = gridSize >= 8 ? 42 : 48;
               ctx.drawImage(CUSTOM_SPRITES.palm.img, px - iconSize / 2, py - iconSize / 2, iconSize, iconSize);
             } else {
-              ctx.font = `${gridSize >= 8 ? 17 : 20}px sans-serif`;
+              ctx.font = `${gridSize >= 8 ? 28 : 34}px sans-serif`;
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               ctx.fillText('🌴', px, py + 1);
@@ -1510,32 +1517,22 @@
 
           if (isHead) {
             ctx.beginPath();
-            ctx.arc(px, py, baseDotRadius + 7, 0, Math.PI * 2);
-            ctx.fillStyle = isEnd ? 'rgba(52, 211, 153, 0.35)' : 'rgba(251, 191, 36, 0.32)';
+            ctx.arc(px, py, baseDotRadius + 14, 0, Math.PI * 2);
+            ctx.fillStyle = isEnd ? 'rgba(52, 211, 153, 0.35)' : 'rgba(251, 191, 36, 0.34)';
             ctx.fill();
+            ctx.strokeStyle = isEnd ? '#34d399' : '#fbbf24';
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
             if (CUSTOM_SPRITES.lion.ready && CUSTOM_SPRITES.lion.img) {
-              const iconSize = gridSize >= 8 ? 26 : 30;
+              const iconSize = gridSize >= 8 ? 44 : 52;
               ctx.drawImage(CUSTOM_SPRITES.lion.img, px - iconSize / 2, py - iconSize / 2, iconSize, iconSize);
             } else {
-              ctx.font = `${gridSize >= 8 ? 18 : 21}px sans-serif`;
+              ctx.font = `${gridSize >= 8 ? 30 : 36}px sans-serif`;
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               ctx.fillText('🦁', px, py + 1);
             }
-            continue;
-          }
-
-          if (isHead) {
-            ctx.beginPath();
-            ctx.arc(px, py, baseDotRadius + 7, 0, Math.PI * 2);
-            ctx.fillStyle = isEnd ? 'rgba(52, 211, 153, 0.35)' : 'rgba(251, 191, 36, 0.32)';
-            ctx.fill();
-
-            ctx.font = `${gridSize >= 8 ? 18 : 21}px sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('🦁', px, py + 1);
             continue;
           }
 
@@ -1655,9 +1652,22 @@
       }
     });
 
-    const resizeObserver = new ResizeObserver(() => resizeCanvas());
+    let resizeRafId = null;
+    const resizeObserver = new ResizeObserver(() => {
+      if (resizeRafId) cancelAnimationFrame(resizeRafId);
+      resizeRafId = requestAnimationFrame(() => {
+        resizeCanvas();
+        resizeRafId = null;
+      });
+    });
     resizeObserver.observe(canvasWrapper);
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', () => {
+      if (resizeRafId) cancelAnimationFrame(resizeRafId);
+      resizeRafId = requestAnimationFrame(() => {
+        resizeCanvas();
+        resizeRafId = null;
+      });
+    });
 
     window.onload = function () {
       loadLevel(0);
