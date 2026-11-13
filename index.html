@@ -1092,7 +1092,7 @@
       const isExactMatch = areRadicalMapsEqual(playerMap, level.targetMap);
       const stepsUsed = state.path.length - 1;
       const optimalSteps = level.solution.length - 1;
-      const withinStepLimit = stepsUsed <= level.maxSteps;
+      const isBriskSteps = stepsUsed <= optimalSteps + 1;
       const isOptimalSteps = stepsUsed <= optimalSteps;
 
       if (isExactMatch) {
@@ -1101,16 +1101,16 @@
         buildLevelButtons();
         playTone('win');
         startConfetti();
-        const stars = 1 + (withinStepLimit ? 1 : 0) + (isOptimalSteps ? 1 : 0);
+        const stars = 1 + (isBriskSteps ? 1 : 0) + (isOptimalSteps ? 1 : 0);
         updateUI();
         render();
         showInlineResult({
           win: true,
           stars,
-          title: stars === 3 ? '🏆 三星草原宗師！' : '🎉 綠洲密碼解鎖！',
+          title: stars === 3 ? '🏆 三星草原宗師！' : stars === 2 ? '🎉 二星俐落通關！' : '🌿 一星成功抵達綠洲！',
           desc: stars === 3
-            ? `恭喜你以完美以最簡 ${stepsUsed} 步抵達椰子樹，離通關成為獅子王更近了一步，棋盤已標示所有線段距離！`
-            : `恭喜你成功以 ${stepsUsed} 步解鎖密碼，離通關成為獅子王更近了一步，（宗師最簡解為 ${optimalSteps} 步）。`
+            ? `恭喜你以完美最簡 ${stepsUsed} 步抵達椰子樹，離通關成為獅子王更近了一步，棋盤已標示所有線段距離！`
+            : `恭喜你成功以 ${stepsUsed} 步解鎖密碼，離通關成為獅子王更近了一步（${optimalSteps + 1} 步內二星、${optimalSteps} 步內三星宗師）。`
         });
       } else {
         state.isWon = false;
