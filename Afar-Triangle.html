@@ -531,6 +531,7 @@
     let playerPath = [];
     let isLevelCleared = false;
     let showHintPath = false;
+    let usedHintInRun = false;
 
     let isPointerDragging = false;
     let hoveredNode = null;
@@ -663,7 +664,11 @@
 
       banner.className = 'w-full rounded-2xl bg-slate-900/75 border border-slate-700/70 px-3 py-1.5 sm:px-3.5 sm:py-2 flex flex-col sm:flex-row items-center justify-between gap-1.5 text-[11px] sm:text-sm shrink-0';
       msgEl.className = 'text-slate-200 font-medium text-center sm:text-left leading-snug';
-      msgEl.textContent = `引導小獅抵達椰子樹並吻合密碼；若小獅子以 ${cfg.optimalSteps} 步內完成可奪得三星宗師！`;
+      if (usedHintInRun) {
+        msgEl.textContent = `🧭 已啟用宗師提示（標示第一步落點）；本關通關最高獲得 ★☆☆ 1 星，重走本關可無提示衝刺三星！`;
+      } else {
+        msgEl.textContent = `引導小獅抵達椰子樹並吻合密碼；若小獅子以 ${cfg.optimalSteps} 步內完成可奪得三星宗師！`;
+      }
       actions.classList.add('hidden');
     }
 
@@ -678,6 +683,7 @@
       playerPath = [{ x: cfg.start.x, y: cfg.start.y }];
       isLevelCleared = false;
       showHintPath = false;
+      usedHintInRun = false;
       hoveredNode = null;
       isPointerDragging = false;
 
@@ -741,10 +747,12 @@
       const cfg = getLevelConfig(currentLevelNum);
 
       let earnedStars = 1;
-      if (stepsUsed <= cfg.optimalSteps) {
-        earnedStars = 3;
-      } else if (stepsUsed === cfg.optimalSteps + 1) {
-        earnedStars = 2;
+      if (!usedHintInRun) {
+        if (stepsUsed <= cfg.optimalSteps) {
+          earnedStars = 3;
+        } else if (stepsUsed === cfg.optimalSteps + 1) {
+          earnedStars = 2;
+        }
       }
 
       const prevStars = Number(saveState.stars[currentLevelNum]) || 0;
@@ -770,7 +778,9 @@
       banner.className = 'w-full rounded-2xl bg-emerald-950/80 border border-emerald-400/60 px-3 py-1.5 sm:px-3.5 sm:py-2 flex flex-col sm:flex-row items-center justify-between gap-1.5 text-[11px] sm:text-sm animate-pop-in shrink-0';
       msgEl.className = 'text-emerald-200 font-bold text-center sm:text-left leading-snug';
 
-      if (earnedStars === 3) {
+      if (usedHintInRun) {
+        msgEl.textContent = `已借助宗師第一步提示通關（獲得 ★☆☆ 1 星）；若想奪得三星宗師榮耀，可點「重走本關」親自破解！`;
+      } else if (earnedStars === 3) {
         msgEl.textContent = `恭喜你以完美以最簡 ${stepsUsed} 步抵達椰子樹，離通關成為獅子王更近了一步，棋盤已標示所有線段距離！`;
       } else {
         msgEl.textContent = `恭喜你成功以 ${stepsUsed} 步解鎖密碼，離通關成為獅子王更近了一步，（宗師最簡解為 ${cfg.optimalSteps} 步）。`;
@@ -1124,18 +1134,25 @@
         ctx.stroke();
       }
 
-      if (showHintPath && !isLevelCleared) {
+      if (showHintPath && !isLevelCleared && cfg.solutionPath && cfg.solutionPath.length > 1) {
+        const firstStep = cfg.solutionPath[1];
+        const { cx, cy } = gridToCanvas(firstStep);
         ctx.save();
-        ctx.strokeStyle = 'rgba(52, 211, 153, 0.55)';
-        ctx.lineWidth = 3;
-        ctx.setLineDash([7, 6]);
         ctx.beginPath();
-        cfg.solutionPath.forEach((pt, idx) => {
-          const { cx, cy } = gridToCanvas(pt);
-          if (idx === 0) ctx.moveTo(cx, cy);
-          else ctx.lineTo(cx, cy);
-        });
+        ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(52, 211, 153, 0.22)';
+        ctx.fill();
+        ctx.strokeStyle = '#34d399';
+        ctx.lineWidth = 2.6;
+        ctx.setLineDash([5, 4]);
         ctx.stroke();
+
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#6ee7b7';
+        ctx.font = 'bold 11px Inter, "Noto Sans TC", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('第一步落點', cx, cy - 24);
         ctx.restore();
       }
 
@@ -1297,8 +1314,13 @@
     });
 
     document.getElementById('hint-btn').addEventListener('click', () => {
+      if (isLevelCleared) return;
       showHintPath = !showHintPath;
+      if (showHintPath) {
+        usedHintInRun = true;
+      }
       playTone(587.33, 0.09, 'sine', 0.06);
+      updateMoveStats();
       drawBoard();
     });
 
