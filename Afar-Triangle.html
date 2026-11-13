@@ -375,6 +375,14 @@
     }
 
     function gcd(a, b) {
+      while (b !== 0) {
+        const t = b;
+        b = a % b;
+        a = t;
+      }
+      return a || 1;
+    }
+
     // Generate levels on-demand with caching so mobile page opens instantaneously
     const LEVEL_CACHE = {};
 
