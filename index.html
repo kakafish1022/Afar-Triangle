@@ -46,9 +46,10 @@
       <span class="text-amber-400 text-sm">◈</span>
       <span class="text-xs sm:text-sm font-black tracking-widest text-amber-300">貳餘 · 幾何系列</span>
     </div>
-    <span class="text-xs font-mono text-amber-200/70 bg-slate-950/60 px-3 py-1 rounded-full border border-slate-800">
-      v2.2 · 50 關完整版
-    </span>
+    <button id="open-guide-btn" type="button" class="px-3.5 py-1.5 rounded-full bg-slate-950/80 hover:bg-slate-800 border border-amber-400/45 text-amber-200 font-bold text-xs sm:text-sm backdrop-blur-md shadow-lg transition active:scale-95 flex items-center gap-1.5 cursor-pointer">
+      <span class="w-4 h-4 rounded-full bg-amber-500/25 border border-amber-400/60 text-amber-300 text-[11px] flex items-center justify-center font-black">?</span>
+      <span>遊戲說明</span>
+    </button>
   </header>
 
   <!-- Center Hero Card -->
@@ -141,6 +142,74 @@
     </div>
 
   </main>
+
+  <!-- How to Play Guide Modal (Triggered by Top-Right Button) -->
+  <div id="guide-modal" class="fixed inset-0 z-40 hidden bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+    <div class="relative w-full max-w-2xl max-h-[88vh] flex flex-col rounded-3xl overflow-hidden border-2 border-amber-500/45 bg-slate-900 shadow-2xl">
+      <!-- Modal Header -->
+      <div class="px-5 py-4 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">📜</span>
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-amber-300 tracking-wide">大草原幾何密碼 · 冒險指南</h2>
+            <p class="text-[11px] sm:text-xs text-slate-400">三步驟掌握畢氏定理與最簡根式解謎</p>
+          </div>
+        </div>
+        <button id="close-guide-modal-btn" type="button" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold text-xs transition cursor-pointer shrink-0">
+          ✕ 關閉
+        </button>
+      </div>
+
+      <!-- Scrollable Guide Cards -->
+      <div class="p-4 sm:p-6 overflow-y-auto space-y-3.5 text-left">
+        <!-- Rule 1 -->
+        <div class="rounded-2xl bg-slate-950/80 border border-slate-800 p-4 flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-400/35 text-amber-300 font-black font-mono text-sm flex items-center justify-center shrink-0">
+            √2
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-sm sm:text-base font-black text-amber-200">1. 格點連線自動累計最簡根式</h3>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              相鄰格點間距為 <span class="font-mono text-amber-300 font-bold">1</span>。直走 1 格為 <span class="font-mono text-amber-300">1</span>、斜走 1 格為 <span class="font-mono text-amber-300">√2</span>、走日字形為 <span class="font-mono text-amber-300">√5</span>。引導小獅走到椰子樹（🌴），讓<span class="text-emerald-300 font-bold">累計步距剛好等於石碑密碼</span>即可過關！
+            </p>
+          </div>
+        </div>
+
+        <!-- Rule 2 -->
+        <div class="rounded-2xl bg-slate-950/80 border border-slate-800 p-4 flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-400/35 text-lg flex items-center justify-center shrink-0">
+            🪨
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-sm sm:text-base font-black text-amber-200">2. 地形障礙與不走回頭路</h3>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              連線路徑不可穿過巨石（🪨）與湖泊（💧），且同一關內<span class="text-amber-300 font-bold">不可重複踩踏已走過的格點</span>。手機與平板可直接按住小獅連續滑動，往回滑即可退回一步。
+            </p>
+          </div>
+        </div>
+
+        <!-- Rule 3 -->
+        <div class="rounded-2xl bg-slate-950/80 border border-slate-800 p-4 flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-400/35 text-emerald-300 font-black text-sm flex items-center justify-center shrink-0">
+            ★★★
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-sm sm:text-base font-black text-amber-200">3. 宗師三星評價與提示規則</h3>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              以最簡宗師步數完成可奪得 <span class="text-amber-300 font-bold">★★★</span> 滿星！卡關時可使用「宗師提示」顯示<span class="text-emerald-300 font-bold">第一步關鍵落點</span>（使用提示通關最高獲得 1 星，重走本關可無提示衝刺三星）。每全破 10 關解鎖一張獅王成長畫作！
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-5 py-3.5 bg-slate-950/90 border-t border-slate-800 flex justify-end">
+        <button id="confirm-guide-btn" type="button" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition cursor-pointer">
+          我明白了，開始冒險！
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Expandable Milestone Gallery Modal (Opened via Button) -->
   <div id="gallery-modal" class="fixed inset-0 z-40 hidden bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
@@ -278,8 +347,24 @@
       try {
         sessionStorage.setItem('savanna_entered_from_home', '1');
       } catch (e) {}
-      const separator = targetUrl.includes('?') ? '&' : '?';
-      window.location.assign(`${targetUrl}${separator}t=${Date.now()}`);
+
+      // In sandboxed blob: preview environments, relative multi-page HTML files do not exist
+      if (window.location.protocol === 'blob:' || !targetUrl) {
+        const badge = document.getElementById('save-status-badge');
+        if (badge) {
+          badge.textContent = `預覽模式：部署至資料夾後將前往 ${targetUrl.split('?')[0]}`;
+          badge.className = 'text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-500/25 text-amber-200 border border-amber-400/50';
+        }
+        return;
+      }
+
+      try {
+        const separator = targetUrl.includes('?') ? '&' : '?';
+        const resolvedUrl = new URL(`${targetUrl}${separator}t=${Date.now()}`, window.location.href).href;
+        window.location.assign(resolvedUrl);
+      } catch (err) {
+        console.warn('Navigation skipped in preview:', err);
+      }
     }
 
     function openChapterLightbox(chapter) {
@@ -318,6 +403,23 @@
 
       lightbox.classList.remove('hidden');
     }
+
+    // How-to-Play Guide Modal Open / Close Controls
+    const guideModal = document.getElementById('guide-modal');
+    document.getElementById('open-guide-btn').addEventListener('click', () => {
+      guideModal.classList.remove('hidden');
+    });
+    document.getElementById('close-guide-modal-btn').addEventListener('click', () => {
+      guideModal.classList.add('hidden');
+    });
+    document.getElementById('confirm-guide-btn').addEventListener('click', () => {
+      guideModal.classList.add('hidden');
+    });
+    guideModal.addEventListener('click', (e) => {
+      if (e.target.id === 'guide-modal') {
+        guideModal.classList.add('hidden');
+      }
+    });
 
     // Gallery Modal Open / Close Controls
     const galleryModal = document.getElementById('gallery-modal');
