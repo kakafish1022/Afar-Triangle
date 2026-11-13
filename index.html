@@ -317,6 +317,76 @@
     </div>
   </div>
 
+  <!-- FULL-SCREEN LION KING CORONATION OVERLAY (LEVEL 50 GRAND FINALE) -->
+  <div id="coronation-overlay" class="fixed inset-0 z-50 hidden flex-col justify-between bg-slate-950 select-none overflow-hidden">
+    <!-- Full-Screen Coronation Artwork (Auto-loads image/coronation.png or .jpg) -->
+    <img
+      id="coronation-img"
+      src="image/coronation.png"
+      alt="非洲大草原獅子王加冕儀式"
+      class="hidden absolute inset-0 w-full h-full object-cover object-center transition-transform duration-1000 scale-100"
+      onload="this.classList.remove('hidden'); document.getElementById('coronation-fallback-art').classList.add('hidden');"
+      onerror="if(!this.dataset.triedJpg){this.dataset.triedJpg='1'; this.src='image/coronation.jpg';}else{this.remove();}"
+    />
+
+    <!-- Built-in Golden Savanna Sunset Fallback Illustration (Shown before image/coronation.png is uploaded) -->
+    <div id="coronation-fallback-art" class="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-amber-950 via-orange-900/80 to-slate-950">
+      <div class="absolute w-[75vw] h-[75vw] max-w-[680px] max-h-[680px] rounded-full bg-gradient-to-tr from-amber-500/30 via-yellow-400/20 to-transparent blur-3xl"></div>
+      <svg viewBox="0 0 400 400" class="w-72 h-72 sm:w-96 sm:h-96 opacity-90 drop-shadow-[0_0_35px_rgba(251,191,36,0.45)]" fill="none">
+        <circle cx="200" cy="180" r="115" fill="url(#sunGrad)" opacity="0.35" />
+        <defs>
+          <radialGradient id="sunGrad">
+            <stop offset="0%" stop-color="#fde047" />
+            <stop offset="100%" stop-color="#d97706" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <!-- Crown -->
+        <path d="M135 125 L155 75 L182 110 L200 62 L218 110 L245 75 L265 125 Z" fill="#fbbf24" stroke="#fef08a" stroke-width="3" stroke-linejoin="round" />
+        <rect x="135" y="128" width="130" height="14" rx="5" fill="#f59e0b" />
+        <!-- Pride Rock Silhouette -->
+        <path d="M40 360 L150 265 L330 235 L260 285 L370 360 Z" fill="#1e1b18" stroke="#78350f" stroke-width="2" />
+        <text x="200" y="205" text-anchor="middle" font-size="68">🦁</text>
+        <text x="200" y="330" text-anchor="middle" fill="#fde68a" font-size="13" font-weight="800" letter-spacing="2">放入 image/coronation.png 顯示專屬加冕大圖</text>
+      </svg>
+    </div>
+
+    <!-- Subtle Vignette Gradient for Readability -->
+    <div id="coronation-vignette" class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/55 transition-opacity duration-500"></div>
+
+    <!-- Top Floating Bar -->
+    <div id="coronation-top-bar" class="relative z-10 flex items-center justify-between p-4 sm:p-6 transition-opacity duration-500">
+      <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/75 border border-amber-400/40 backdrop-blur-md text-amber-300 text-xs sm:text-sm font-black tracking-wider">
+        <span>◈ 貳餘</span>
+        <span class="text-slate-600">|</span>
+        <span>全 50 關制霸榮耀</span>
+      </div>
+      <button id="coronation-toggle-hud-btn" class="px-3.5 py-1.5 rounded-full bg-slate-950/75 hover:bg-slate-900 border border-amber-400/40 backdrop-blur-md text-amber-200 text-xs sm:text-sm font-bold transition cursor-pointer">
+        🖼️ 純賞圖模式
+      </button>
+    </div>
+
+    <!-- Bottom Coronation Title & Return Controls -->
+    <div id="coronation-bottom-bar" class="relative z-10 max-w-2xl w-full mx-auto p-5 sm:p-8 text-center flex flex-col items-center gap-3 transition-opacity duration-500">
+      <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-xs sm:text-sm font-black tracking-widest uppercase">
+        👑 SAVANNA GEOMETRY SOVEREIGN
+      </div>
+      <h2 class="text-2xl sm:text-4xl font-black text-white tracking-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]">
+        非洲大草原 · 新任獅子王加冕！
+      </h2>
+      <p id="coronation-stats-text" class="text-xs sm:text-sm text-amber-100/90 max-w-lg leading-relaxed drop-shadow">
+        你已憑藉精準的畢氏幾何與根式拆解智慧，穿越岩石與湖泊，正式登上榮耀王座！
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+        <button id="coronation-close-btn" class="px-5 py-2.5 rounded-xl bg-slate-900/85 hover:bg-slate-800 border border-slate-600 text-slate-200 text-xs sm:text-sm font-bold backdrop-blur-md transition cursor-pointer">
+          返回棋盤重溫路線
+        </button>
+        <button id="coronation-replay-btn" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xs sm:text-sm font-black shadow-lg shadow-amber-500/30 transition cursor-pointer">
+          🔄 從第 1 關開啟新傳說
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ==========================================
     // 1. RADICAL ALGEBRA & SIMPLIFICATION ENGINE
@@ -1147,7 +1217,7 @@
         nextBtn.className = 'w-full py-1.5 px-3 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 transition cursor-pointer';
         nextBtn.textContent = state.currentLevelIndex < LEVELS.length - 1
           ? `前往第 ${LEVELS[state.currentLevelIndex + 1].id} 關 ➔`
-          : '🏆 全破恭喜！回到第 1 關';
+          : '👑 登上榮耀王座（全畫面加冕儀式）';
       } else {
         banner.className = 'rounded-xl p-2.5 sm:p-3 border border-rose-500/50 bg-rose-950/55 transition-colors flex flex-col justify-between gap-1.5 min-h-[86px] shadow-lg';
         titleEl.className = 'text-xs sm:text-sm font-black text-rose-300';
@@ -1173,7 +1243,7 @@
       titleEl.textContent = '🧭 草原探險指引';
       starsEl.className = 'font-mono text-base sm:text-lg tracking-widest font-black';
       starsEl.innerHTML = '<span class="text-slate-600">★★★</span>';
-      descEl.textContent = `引導小獅抵達椰子樹並吻合密碼；若可以以 ${optimalSteps} 步內完成可奪得三星宗師！`;
+      descEl.textContent = `引導小獅抵達椰子樹並吻合密碼；若小獅子以 ${optimalSteps} 步內完成可奪得三星宗師！`;
       nextBtn.disabled = true;
       nextBtn.className = 'w-full py-1.5 px-3 rounded-lg bg-slate-800/80 text-slate-500 border border-slate-700/60 font-black text-xs sm:text-sm transition disabled:cursor-not-allowed';
       nextBtn.textContent = '尚未解鎖下一關';
@@ -1710,8 +1780,54 @@
       if (state.currentLevelIndex < LEVELS.length - 1) {
         loadLevel(state.currentLevelIndex + 1);
       } else {
-        loadLevel(0);
+        openCoronationCeremony();
       }
+    });
+
+    // Grand Finale Full-Screen Coronation Ceremony Controls
+    const coronationOverlay = document.getElementById('coronation-overlay');
+    let coronationHudHidden = false;
+
+    function openCoronationCeremony() {
+      playTone('win');
+      startConfetti();
+      const statsEl = document.getElementById('coronation-stats-text');
+      if (statsEl) {
+        statsEl.textContent = `已制霸 ${state.completedLevels.size} / ${LEVELS.length} 關！你憑藉畢氏幾何與根式拆解的智慧，正式加冕為非洲大草原的獅子王！`;
+      }
+      coronationHudHidden = false;
+      document.getElementById('coronation-bottom-bar').classList.remove('opacity-0', 'pointer-events-none');
+      document.getElementById('coronation-vignette').classList.remove('opacity-0');
+      document.getElementById('coronation-toggle-hud-btn').textContent = '🖼️ 純賞圖模式';
+      coronationOverlay.classList.remove('hidden');
+      coronationOverlay.classList.add('flex');
+    }
+
+    document.getElementById('coronation-toggle-hud-btn').addEventListener('click', () => {
+      coronationHudHidden = !coronationHudHidden;
+      const bottomBar = document.getElementById('coronation-bottom-bar');
+      const vignette = document.getElementById('coronation-vignette');
+      const toggleBtn = document.getElementById('coronation-toggle-hud-btn');
+      if (coronationHudHidden) {
+        bottomBar.classList.add('opacity-0', 'pointer-events-none');
+        vignette.classList.add('opacity-0');
+        toggleBtn.textContent = '📜 顯示加冕銘牌';
+      } else {
+        bottomBar.classList.remove('opacity-0', 'pointer-events-none');
+        vignette.classList.remove('opacity-0');
+        toggleBtn.textContent = '🖼️ 純賞圖模式';
+      }
+    });
+
+    document.getElementById('coronation-close-btn').addEventListener('click', () => {
+      coronationOverlay.classList.add('hidden');
+      coronationOverlay.classList.remove('flex');
+    });
+
+    document.getElementById('coronation-replay-btn').addEventListener('click', () => {
+      coronationOverlay.classList.add('hidden');
+      coronationOverlay.classList.remove('flex');
+      loadLevel(0);
     });
 
     let resizeRafId = null;
