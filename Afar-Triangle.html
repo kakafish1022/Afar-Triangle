@@ -3,35 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <!-- Tailwind CSS -->
+  <title>幾何密碼：大草原獅王之路｜Afar-Triangle</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <title>草原幾何密碼：非洲大草原根式探險</title>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100dvh;
-      overflow: hidden;
+    body {
       font-family: 'Inter', 'Noto Sans TC', sans-serif;
-      background: radial-gradient(circle at top left, #291d12 0%, #0f172a 52%, #06121e 100%);
+      background-color: #090d16;
+      color: #f8fafc;
+      overscroll-behavior: none;
     }
-
-    .font-mono {
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    /* Hide scrollbar for level selector */
+    /* Hide scrollbars cleanly for level selector ribbon */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -39,1808 +23,1318 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
-
-    #game-canvas {
+    /* Lock touch gestures strictly on the puzzle board for smooth drag-to-move */
+    #board-canvas {
       touch-action: none;
-      display: block;
-      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
     }
-
-    @keyframes starPop {
-      0% { transform: scale(0.2) rotate(-25deg); opacity: 0; }
-      70% { transform: scale(1.25) rotate(8deg); opacity: 1; }
-      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    @keyframes popIn {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
     }
-    .star-active {
-      animation: starPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-6px); }
-      40%, 80% { transform: translateX(6px); }
-    }
-    .animate-shake {
-      animation: shake 0.35s ease-in-out;
-    }
-
-    .canvas-container {
-      background:
-        radial-gradient(circle at 78% 22%, rgba(251, 191, 36, 0.24) 0%, rgba(245, 158, 11, 0.08) 34%, transparent 65%),
-        linear-gradient(180deg, rgba(120, 53, 15, 0.28) 0%, rgba(180, 83, 9, 0.18) 48%, rgba(6, 78, 59, 0.30) 100%),
-        rgba(15, 23, 42, 0.72);
+    .animate-pop-in {
+      animation: popIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
   </style>
 </head>
-<body class="text-slate-100 flex flex-col justify-between p-2 sm:p-3 lg:p-4">
+<body class="min-h-screen flex flex-col justify-between bg-[radial-gradient(circle_at_50%_0%,rgba(245,158,11,0.14),rgba(9,13,22,0.98)_65%)] select-none overflow-x-hidden">
 
-  <!-- TOP HEADER: Title, Level Selector & Audio/Hint -->
-  <header class="w-full max-w-6xl mx-auto flex items-center justify-between gap-2 pb-2 shrink-0">
-    <div class="flex items-center gap-2 shrink-0">
-      <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25 text-base sm:text-lg">
-        🦁
-      </div>
-      <div>
-        <div class="flex items-center gap-1.5">
-          <h1 class="text-sm sm:text-lg font-black tracking-tight text-white leading-tight">草原幾何密碼</h1>
-          <span id="grid-size-badge" class="px-1.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-400/30 text-amber-300 font-mono text-[10px] sm:text-xs font-extrabold">6×6</span>
+  <!-- Top Navigation & Status Header -->
+  <header class="w-full max-w-4xl mx-auto px-3 sm:px-5 pt-3 pb-2 flex flex-col gap-2">
+    <div class="flex items-center justify-between gap-2">
+      <!-- Brand & Back to Home -->
+      <div class="flex items-center gap-2">
+        <button id="home-btn" type="button" class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-amber-500/40 text-amber-200 font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow transition active:scale-95 cursor-pointer">
+          <span>🏠</span>
+          <span>主畫面</span>
+        </button>
+        <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/70 border border-slate-800 text-xs font-black tracking-wider text-amber-300">
+          <span>◈</span>
+          <span>貳餘 · AFAR-TRIANGLE</span>
         </div>
-        <p class="hidden sm:block text-[11px] text-amber-200/80 font-medium">閃避岩石湖泊 · 盲算根式路徑協助小獅抵達綠洲</p>
+      </div>
+
+      <!-- Current Level Badge & Total Progress -->
+      <div class="flex items-center gap-2">
+        <div class="px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-xs font-mono text-slate-200 flex items-center gap-2">
+          <span id="header-level-label" class="font-black text-amber-300">第 1 / 50 關</span>
+          <span class="text-slate-600">|</span>
+          <span id="header-total-stars" class="text-yellow-400 font-bold">★ 0 / 150</span>
+        </div>
       </div>
     </div>
 
-    <!-- Scrollable Level Selector Bar (50 Levels) -->
-    <div class="flex items-center gap-1.5 bg-slate-900/90 border border-slate-800 p-1 rounded-xl max-w-[44vw] sm:max-w-[46vw] lg:max-w-[520px]">
-      <button id="prev-level-btn" class="px-1.5 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-bold shrink-0" title="上一關">◀</button>
-      <div id="level-selector" class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 px-0.5">
-        <!-- Populated by JS -->
-      </div>
-      <button id="next-level-btn" class="px-1.5 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 text-xs font-bold shrink-0" title="下一關">▶</button>
-    </div>
-
-    <div class="flex items-center gap-1.5 shrink-0">
-      <button id="hint-toggle-btn" class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold transition flex items-center gap-1" title="查看幾何提示">
-        <span>💡</span><span class="hidden md:inline">提示</span>
-      </button>
-      <button id="sound-toggle-btn" class="p-1.5 sm:p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-300 transition text-xs sm:text-sm" title="切換音效">
-        🔊
-      </button>
+    <!-- Horizontal 50-Level Selector Strip -->
+    <div id="level-strip" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-0.5">
+      <!-- Populated dynamically by JS -->
     </div>
   </header>
 
-  <!-- MAIN CONTENT: Responsive Bento Split Layout -->
-  <main class="w-full max-w-6xl mx-auto flex-1 min-h-0 flex flex-col md:flex-row gap-2.5 sm:gap-4 items-stretch justify-center">
+  <!-- Main Puzzle Container -->
+  <main class="w-full max-w-4xl mx-auto px-3 sm:px-5 flex-1 flex flex-col items-center justify-center gap-2.5 py-1">
 
-    <!-- LEFT / TOP PANEL: Mission Cipher, Metrics, Controls & Square Brand Mark -->
-    <div class="w-full md:w-[370px] lg:w-[410px] shrink-0 flex flex-col gap-2.5 min-h-0 overflow-y-auto no-scrollbar">
-      <section class="w-full shrink-0 flex flex-col justify-between gap-2 bg-slate-900/75 border border-slate-800/90 backdrop-blur-md rounded-2xl p-2.5 sm:p-4 shadow-2xl">
-        <div class="flex flex-col gap-2">
-          <!-- Level Header & Mode Tag -->
-          <div class="flex items-center justify-between gap-2">
-            <span id="level-title" class="text-xs sm:text-sm font-extrabold text-amber-300 truncate">
-              關卡 1 / 50 · 初探草原
-            </span>
-            <span class="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] sm:text-xs font-bold shrink-0">
-              支援自由拆併
-            </span>
-          </div>
-
-          <!-- Target Cipher & Metrics Card -->
-          <div class="bg-slate-950/85 border border-amber-500/30 rounded-xl p-2.5 sm:p-3 flex flex-col gap-2">
-            <div class="flex items-baseline justify-between gap-2">
-              <div class="min-w-0">
-                <div class="text-[10px] sm:text-[11px] font-bold text-amber-300/80">🎯 目標幾何密碼</div>
-                <div id="target-formula" class="font-mono text-lg sm:text-xl font-black text-white tracking-tight truncate">
-                  2 + 2√5 + √2
-                </div>
-              </div>
-              <span id="approx-target" class="font-mono text-xs font-bold text-slate-400 shrink-0">≈ 7.89</span>
-            </div>
-
-            <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-800/80 text-center">
-              <div class="bg-slate-900/90 rounded-lg p-1.5 border border-slate-800/80">
-                <div class="text-[10px] text-slate-400 font-semibold">步數 / 上限</div>
-                <div id="step-counter" class="font-mono text-sm sm:text-base font-black text-white">0 / 6</div>
-              </div>
-              <div class="bg-slate-900/90 rounded-lg p-1.5 border border-slate-800/80">
-                <div class="text-[10px] text-slate-400 font-semibold">宗師步數</div>
-                <div id="optimal-step-display" class="font-mono text-sm sm:text-base font-black text-amber-300">4 步</div>
-              </div>
-              <div class="bg-slate-900/90 rounded-lg p-1.5 border border-slate-800/80 flex flex-col justify-center">
-                <div class="text-[10px] text-slate-400 font-semibold">累積算式</div>
-                <div id="current-formula-display" class="font-mono text-xs font-extrabold text-amber-300 truncate">尚未出發</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Fixed-Height Status & Result Banner (Always visible to prevent layout shift) -->
-          <div id="inline-result-banner" class="rounded-xl p-2.5 sm:p-3 border border-slate-800/90 bg-slate-950/75 transition-colors flex flex-col justify-between gap-1.5 min-h-[86px]">
-            <div class="flex items-center justify-between gap-2">
-              <span id="inline-result-title" class="text-xs sm:text-sm font-black text-amber-300">🧭 草原探險指引</span>
-              <span id="inline-result-stars" class="font-mono text-base sm:text-lg tracking-widest font-black"><span class="text-slate-600">★★★</span></span>
-            </div>
-            <p id="inline-result-desc" class="text-[11px] sm:text-xs leading-snug text-slate-300">
-              引導小獅抵達椰子樹，使總長吻合目標密碼；在宗師步數內完成可奪得三星！
-            </p>
-            <div id="inline-next-row" class="pt-0.5">
-              <button id="inline-next-btn" disabled class="w-full py-1.5 px-3 rounded-lg bg-slate-800/80 text-slate-500 border border-slate-700/60 font-black text-xs sm:text-sm transition disabled:cursor-not-allowed">
-                尚未解鎖下一關
-              </button>
-            </div>
-          </div>
-
-          <!-- Steps Breakdown Mini-Log -->
-          <div class="bg-slate-950/60 border border-slate-800/70 rounded-xl p-2 sm:p-2.5 flex flex-col gap-1">
-            <div class="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
-              <span>步伐紀錄（不可穿越岩石/湖泊）</span>
-              <span id="blind-status-badge" class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">盲算模式中</span>
-            </div>
-            <div id="step-log-list" class="flex flex-wrap gap-1.5 min-h-[26px] items-center">
-              <span class="text-xs text-slate-500 italic">點擊或拖曳小獅 🦁 開始前進...</span>
-            </div>
+    <!-- Mission Equation & Step HUD Card -->
+    <div class="w-full rounded-2xl bg-slate-900/85 border border-slate-700/80 backdrop-blur-md px-3.5 py-2.5 sm:px-5 sm:py-3 shadow-xl flex flex-wrap items-center justify-between gap-2">
+      <!-- Target vs Current Radical Expression -->
+      <div class="flex items-center gap-2.5 sm:gap-4">
+        <div class="flex flex-col">
+          <span class="text-[10px] sm:text-xs text-slate-400 font-bold tracking-wider">石碑目標密碼</span>
+          <div id="target-formula" class="text-lg sm:text-2xl font-black text-amber-300 font-mono tracking-tight">
+            √2 + 1
           </div>
         </div>
-
-        <!-- Action Buttons -->
-        <div class="grid grid-cols-2 gap-2 pt-1">
-          <button id="undo-btn" class="py-2 sm:py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none border border-slate-700 text-slate-200 text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5">
-            <span>↩️</span> <span>復原一步</span>
-          </button>
-          <button id="reset-btn" class="py-2 sm:py-2.5 px-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 active:scale-[0.98] border border-amber-500/35 text-amber-300 text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5">
-            <span>🔄</span> <span>重新本關</span>
-          </button>
+        <span class="text-slate-600 text-lg font-bold">⇄</span>
+        <div class="flex flex-col">
+          <span class="text-[10px] sm:text-xs text-slate-400 font-bold tracking-wider">目前累計步距</span>
+          <div id="current-formula" class="text-lg sm:text-2xl font-black text-emerald-300 font-mono tracking-tight">
+            0
+          </div>
         </div>
-      </section>
+      </div>
 
-      <!-- Bottom-Left Square Brand Artwork Area (Same width as left panel, 1:1 square, transparent background) -->
-      <div id="left-square-mark-box" class="hidden md:flex w-full aspect-square shrink-0 items-center justify-center overflow-hidden">
-        <img
-          id="left-square-mark-img"
-          src="image/mark.png"
-          alt="貳餘 Mark"
-          class="hidden w-full h-full object-contain"
-          onload="this.classList.remove('hidden'); document.getElementById('left-square-mark-fallback').classList.add('hidden');"
-          onerror="if(!this.dataset.triedJpg){this.dataset.triedJpg='1'; this.src='image/mark.jpg';}else{this.remove();}"
-        />
-        <!-- Fallback emblem matching environment background before image/mark.png is uploaded -->
-        <div id="left-square-mark-fallback" class="w-full h-full flex flex-col items-center justify-center gap-2 opacity-65 select-none">
-          <svg viewBox="0 0 120 120" class="w-24 h-24 text-amber-400/80" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="60,12 104,36 104,84 60,108 16,84 16,36" stroke-dasharray="4 3" />
-            <circle cx="60" cy="60" r="30" stroke="currentColor" stroke-opacity="0.5" />
-            <text x="60" y="66" text-anchor="middle" fill="currentColor" stroke="none" font-size="22" font-weight="900" letter-spacing="2">貳餘</text>
-          </svg>
-          <span class="text-[11px] font-mono tracking-widest text-amber-300/60">image/mark.png</span>
+      <!-- Step Counter & Uniform-Size 3-Star Indicator -->
+      <div class="flex items-center gap-3 ml-auto">
+        <div class="text-right">
+          <div class="text-[10px] sm:text-xs text-slate-400">已走步數 / 上限</div>
+          <div class="text-sm sm:text-base font-black font-mono text-slate-100">
+            <span id="steps-used" class="text-amber-300">0</span>
+            <span class="text-slate-500"> / </span>
+            <span id="steps-limit">4</span>
+            <span class="text-[11px] text-slate-400 ml-1">(宗師 <span id="steps-optimal" class="text-emerald-400">2</span> 步)</span>
+          </div>
+        </div>
+        <!-- Fixed-size equal-width solid stars (only color changes, never jumps in size) -->
+        <div id="hud-stars" class="px-2.5 py-1 rounded-xl bg-slate-950/90 border border-slate-800 text-base sm:text-lg font-mono tracking-widest flex items-center" title="三星評價：宗師步數3星、宗師+1步2星、通關1星">
+          <span id="hud-star-1" class="text-slate-600 transition-colors duration-300">★</span>
+          <span id="hud-star-2" class="text-slate-600 transition-colors duration-300">★</span>
+          <span id="hud-star-3" class="text-slate-600 transition-colors duration-300">★</span>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT / CENTER PANEL: Interactive Savanna Grid Board -->
-    <section class="flex-1 min-h-0 flex flex-col items-center justify-center relative">
-      <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-30"></canvas>
-      <div id="canvas-wrapper" class="canvas-container relative w-full h-full max-w-[660px] max-h-[660px] border border-amber-500/30 rounded-2xl shadow-2xl flex items-center justify-center overflow-hidden p-1">
-        <canvas id="game-canvas"></canvas>
-
-        <!-- Floating Status Toast inside canvas -->
-        <div id="canvas-toast" class="pointer-events-none opacity-0 transition-opacity duration-200 absolute top-3 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-slate-900/95 border border-amber-400/50 text-xs font-bold text-amber-200 shadow-lg whitespace-nowrap z-20">
-          提示訊息
-        </div>
-
-        <!-- Bottom-Left "貳餘" In-Canvas Watermark Badge -->
-        <div class="pointer-events-none absolute bottom-2.5 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-950/75 border border-amber-500/30 text-[10px] sm:text-[11px] font-black tracking-wider text-amber-300/95 backdrop-blur-sm shadow-md">
-          <span class="text-amber-400">◈</span>
-          <span>貳餘</span>
-        </div>
-
-        <!-- Legend Badge inside Canvas -->
-        <div class="pointer-events-none absolute bottom-2.5 right-3 z-10 flex items-center gap-2.5 px-2.5 py-1 rounded-full bg-slate-950/75 border border-amber-500/25 text-[10px] sm:text-[11px] text-amber-100/90 backdrop-blur-sm">
-          <span>🦁 小獅</span>
-          <span>🌴 綠洲終點</span>
-          <span id="legend-obstacle" class="hidden">🪨/💧 禁區</span>
-        </div>
+    <!-- Inline Guidance / Clear Banner -->
+    <div id="status-banner" class="w-full rounded-2xl bg-slate-900/75 border border-slate-700/70 px-3.5 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm">
+      <div id="status-message" class="text-slate-200 font-medium text-center sm:text-left leading-relaxed">
+        引導小獅抵達椰子樹並吻合密碼；若小獅子以 2 步內完成可奪得三星宗師！
       </div>
-    </section>
+      <div id="banner-action-group" class="hidden flex items-center gap-2 shrink-0">
+        <button id="next-action-btn" type="button" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition transform active:scale-95 cursor-pointer">
+          前往下一關 ➔
+        </button>
+      </div>
+    </div>
+
+    <!-- Responsive Savanna Geometry Canvas Wrapper -->
+    <div id="canvas-wrapper" class="relative w-full max-w-[520px] aspect-square rounded-3xl overflow-hidden border-2 border-amber-500/35 bg-slate-950 shadow-2xl">
+      <canvas id="board-canvas" class="w-full h-full block"></canvas>
+      <!-- Subtle Mobile Drag Hint Pill -->
+      <div class="pointer-events-none absolute bottom-2.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-slate-950/75 border border-slate-700/70 text-[11px] text-slate-300 whitespace-nowrap backdrop-blur-sm">
+        💡 手機可直接按住小獅滑動連線，往回滑可退一步
+      </div>
+    </div>
+
+    <!-- Bottom Action Controls (Outside Canvas) -->
+    <div class="w-full max-w-[520px] grid grid-cols-3 gap-2.5 pt-0.5 pb-2">
+      <button id="undo-btn" type="button" class="py-3 px-3 rounded-2xl bg-slate-800/95 hover:bg-slate-700 disabled:opacity-40 border border-slate-600/80 text-slate-100 font-bold text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+        <span>↩️</span>
+        <span>退回一步</span>
+      </button>
+      <button id="reset-level-btn" type="button" class="py-3 px-3 rounded-2xl bg-slate-800/95 hover:bg-slate-700 border border-slate-600/80 text-amber-200 font-bold text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+        <span>🔄</span>
+        <span>重走本關</span>
+      </button>
+      <button id="hint-btn" type="button" class="py-3 px-3 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 font-bold text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+        <span>🧭</span>
+        <span>宗師提示</span>
+      </button>
+    </div>
+
   </main>
 
-  <!-- HINT MODAL -->
-  <div id="hint-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden items-center justify-center p-4">
-    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-5 shadow-2xl">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-base font-black text-amber-300 flex items-center gap-2">
-          <span>💡</span> <span>草原幾何戰術提示</span>
-        </h3>
-        <button id="close-hint-btn" class="text-slate-400 hover:text-white text-lg font-bold px-2">✕</button>
+  <!-- Chapter Milestone Fullscreen Overlay (Levels 10, 20, 30, 40) -->
+  <div id="milestone-overlay" class="fixed inset-0 z-50 hidden bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-4">
+    <div class="animate-pop-in relative w-full max-w-4xl rounded-3xl overflow-hidden border-2 border-amber-400/70 bg-slate-900 shadow-2xl">
+      <div class="relative aspect-video w-full bg-slate-950 flex items-center justify-center overflow-hidden">
+        <img id="milestone-img" alt="章節里程碑插畫" class="hidden w-full h-full object-cover" />
+        <div id="milestone-fallback" class="flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-amber-900/50 via-slate-900 to-orange-950/60 w-full h-full">
+          <span id="milestone-fallback-icon" class="text-6xl sm:text-7xl mb-3 drop-shadow">🧭</span>
+          <h3 id="milestone-fallback-title" class="text-2xl sm:text-3xl font-black text-amber-300">章節里程碑達成！</h3>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1.5">已解鎖首頁「獅王圖鑑」專屬收藏畫作</p>
+        </div>
       </div>
-      <p id="hint-text" class="text-sm text-slate-200 leading-relaxed mb-4"></p>
-      <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 space-y-1">
-        <div class="font-bold text-slate-300">常見格子向量長度速查：</div>
-        <div>• 直橫跨 1 / 2 / 3 格 ＝ <span class="font-mono text-amber-300">1</span> / <span class="font-mono text-amber-300">2</span> / <span class="font-mono text-amber-300">3</span></div>
-        <div>• 對角 (1,1) / (2,2) ＝ <span class="font-mono text-amber-300">√2</span> / <span class="font-mono text-amber-300">2√2</span></div>
-        <div>• 日字 (2,1) / (3,1) ＝ <span class="font-mono text-amber-300">√5</span> / <span class="font-mono text-amber-300">√10</span></div>
-        <div>• 馬步 (3,2) / (4,1) ＝ <span class="font-mono text-amber-300">√13</span> / <span class="font-mono text-amber-300">√17</span></div>
+      <div class="p-4 sm:p-5 bg-slate-900/95 flex flex-wrap items-center justify-between gap-3 border-t border-slate-800">
+        <div>
+          <div id="milestone-tag" class="text-xs font-mono text-amber-400">CHAPTER 1 · 第 1～10 關全制霸</div>
+          <div id="milestone-title" class="text-lg sm:text-xl font-black text-white">草原初啼 · 晉升見習幼獅</div>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <button id="close-milestone-btn" type="button" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold text-xs sm:text-sm transition cursor-pointer">
+            留在棋盤
+          </button>
+          <button id="continue-next-chapter-btn" type="button" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition cursor-pointer">
+            繼續挑戰下一章 ➔
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- RESULT MODAL (WIN / LOSS / REVEAL) -->
-  <div id="result-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden items-center justify-center p-4">
-    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
-    <div class="relative z-10 bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl text-center">
-      <!-- Stars Row (For Victory) -->
-      <div id="modal-stars" class="flex items-center justify-center gap-3 text-4xl sm:text-5xl mb-3">
-        <span id="star-1" class="opacity-25 transition-all">★</span>
-        <span id="star-2" class="opacity-25 transition-all">★</span>
-        <span id="star-3" class="opacity-25 transition-all">★</span>
-      </div>
-
-      <h2 id="modal-title" class="text-xl sm:text-2xl font-black text-white mb-1">關卡突破！</h2>
-      <p id="modal-subtitle" class="text-xs sm:text-sm text-slate-300 mb-4">小獅成功抵達綠洲並解開幾何密碼！</p>
-
-      <!-- Star Criteria Checklist (For Victory) -->
-      <div id="star-criteria-box" class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3 mb-3 text-left space-y-1.5 text-xs">
-        <div id="crit-1" class="flex items-center justify-between text-slate-300">
-          <span>★☆☆ 通關星：抵達椰子樹並吻合目標密碼</span>
-          <span class="font-bold text-emerald-400">達成</span>
-        </div>
-        <div id="crit-2" class="flex items-center justify-between text-slate-300">
-          <span>★★☆ 俐落星：不超過步數上限</span>
-          <span class="font-bold text-emerald-400">達成</span>
-        </div>
-        <div id="crit-3" class="flex items-center justify-between text-slate-300">
-          <span>★★★ 宗師星：達成最簡極限步數解</span>
-          <span class="font-bold text-emerald-400">達成</span>
-        </div>
-      </div>
-
-      <!-- Path Segment Reveal Summary -->
-      <div class="bg-slate-950/90 border border-amber-500/25 rounded-2xl p-3 mb-4 text-left">
-        <div class="text-[11px] font-bold text-amber-300 mb-1.5">🔍 路徑每段距離揭曉：</div>
-        <div id="modal-segments-detail" class="flex flex-wrap gap-1.5 mb-2"></div>
-        <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
-          <span class="text-slate-400">你的總長算式：</span>
-          <span id="modal-player-formula" class="font-mono font-extrabold text-white"></span>
-        </div>
-        <div class="flex items-center justify-between text-xs mt-1">
-          <span class="text-slate-400">關卡目標密碼：</span>
-          <span id="modal-target-formula" class="font-mono font-extrabold text-amber-300"></span>
-        </div>
-      </div>
-
-      <!-- Modal Action Buttons -->
-      <div id="modal-actions" class="flex gap-2.5">
-        <button id="modal-retry-btn" class="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm transition">
-          重新嘗試
-        </button>
-        <button id="modal-next-btn" class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-sm shadow-lg shadow-amber-500/25 transition">
-          下一關 ➔
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- FULL-SCREEN LION KING CORONATION OVERLAY (LEVEL 50 GRAND FINALE) -->
-  <div id="coronation-overlay" class="fixed inset-0 z-50 hidden flex-col justify-between bg-slate-950 select-none overflow-hidden">
-    <!-- Full-Screen Coronation Artwork (Auto-loads image/coronation.png or .jpg) -->
-    <img
-      id="coronation-img"
-      src="image/coronation.png"
-      alt="非洲大草原獅子王加冕儀式"
-      class="hidden absolute inset-0 w-full h-full object-cover object-center transition-transform duration-1000 scale-100"
-      onload="this.classList.remove('hidden'); document.getElementById('coronation-fallback-art').classList.add('hidden');"
-      onerror="if(!this.dataset.triedJpg){this.dataset.triedJpg='1'; this.src='image/coronation.jpg';}else{this.remove();}"
-    />
-
-    <!-- Built-in Golden Savanna Sunset Fallback Illustration (Shown before image/coronation.png is uploaded) -->
-    <div id="coronation-fallback-art" class="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-amber-950 via-orange-900/80 to-slate-950">
-      <div class="absolute w-[75vw] h-[75vw] max-w-[680px] max-h-[680px] rounded-full bg-gradient-to-tr from-amber-500/30 via-yellow-400/20 to-transparent blur-3xl"></div>
-      <svg viewBox="0 0 400 400" class="w-72 h-72 sm:w-96 sm:h-96 opacity-90 drop-shadow-[0_0_35px_rgba(251,191,36,0.45)]" fill="none">
-        <circle cx="200" cy="180" r="115" fill="url(#sunGrad)" opacity="0.35" />
-        <defs>
-          <radialGradient id="sunGrad">
-            <stop offset="0%" stop-color="#fde047" />
-            <stop offset="100%" stop-color="#d97706" stop-opacity="0" />
-          </radialGradient>
-        </defs>
-        <!-- Crown -->
-        <path d="M135 125 L155 75 L182 110 L200 62 L218 110 L245 75 L265 125 Z" fill="#fbbf24" stroke="#fef08a" stroke-width="3" stroke-linejoin="round" />
-        <rect x="135" y="128" width="130" height="14" rx="5" fill="#f59e0b" />
-        <!-- Pride Rock Silhouette -->
-        <path d="M40 360 L150 265 L330 235 L260 285 L370 360 Z" fill="#1e1b18" stroke="#78350f" stroke-width="2" />
-        <text x="200" y="205" text-anchor="middle" font-size="68">🦁</text>
-        <text x="200" y="330" text-anchor="middle" fill="#fde68a" font-size="13" font-weight="800" letter-spacing="2">放入 image/coronation.png 顯示專屬加冕大圖</text>
-      </svg>
+  <!-- Level 50 Grand Coronation Fullscreen Overlay (Coronation.png) -->
+  <div id="coronation-overlay" class="fixed inset-0 z-50 hidden bg-slate-950 flex items-center justify-center overflow-hidden">
+    <!-- Fullscreen Coronation Artwork -->
+    <img id="coronation-img" alt="獅子王榮耀加冕" class="hidden w-full h-full object-contain sm:object-cover object-center" />
+    <!-- Savanna Sunset Fallback if image/coronation.png is missing -->
+    <div id="coronation-fallback" class="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[radial-gradient(circle_at_50%_35%,rgba(245,158,11,0.45),rgba(180,83,9,0.25)_45%,rgba(9,13,22,0.98)_85%)]">
+      <span class="text-7xl sm:text-8xl mb-4 drop-shadow-2xl">👑🦁</span>
+      <h2 class="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-500">
+        STAGE CLEAR · YOU ARE THE LION KING!
+      </h2>
+      <p class="text-amber-100/90 text-sm sm:text-lg mt-3 max-w-xl">
+        恭喜全 50 關制霸！在這片廣闊的大草原上，你將帶領族群，迎向更輝煌的未來！
+      </p>
     </div>
 
-    <!-- Subtle Vignette Gradient for Readability -->
-    <div id="coronation-vignette" class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-slate-950/35 transition-opacity duration-500"></div>
+    <!-- Confetti Canvas Layer -->
+    <canvas id="confetti-canvas" class="pointer-events-none fixed inset-0 w-full h-full z-10"></canvas>
 
-    <!-- Top Floating Bar -->
-    <div id="coronation-top-bar" class="relative z-10 flex items-center justify-between p-4 sm:p-6 transition-opacity duration-500">
-      <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/75 border border-amber-400/40 backdrop-blur-md text-amber-300 text-xs sm:text-sm font-black tracking-wider">
-        <span>◈ 貳餘</span>
-        <span class="text-slate-600">|</span>
-        <span id="coronation-stats-text">全 50 關制霸榮耀</span>
-      </div>
-      <button id="coronation-toggle-hud-btn" class="px-3.5 py-1.5 rounded-full bg-slate-950/75 hover:bg-slate-900 border border-amber-400/40 backdrop-blur-md text-amber-200 text-xs sm:text-sm font-bold transition cursor-pointer">
-        🖼️ 純賞圖模式
+    <!-- Compact Bottom-Left Controls (Leaves bottom-right artwork dialogue & lion pride 100% unobstructed) -->
+    <div id="coronation-controls" class="fixed bottom-3 left-3 sm:bottom-5 sm:left-5 z-20 flex flex-wrap items-center gap-2 bg-slate-950/75 backdrop-blur-md px-3 py-2 rounded-2xl border border-amber-400/40 shadow-2xl">
+      <button id="coronation-back-board-btn" type="button" class="px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-100 font-bold text-xs transition cursor-pointer">
+        返回棋盤
       </button>
-    </div>
-
-    <!-- Bottom-Left Compact Coronation Controls (Leaves bottom-right artwork dialogue & lions unobstructed) -->
-    <div id="coronation-bottom-bar" class="relative z-10 self-start p-4 sm:p-6 flex flex-wrap items-center gap-2.5 transition-opacity duration-500">
-      <button id="coronation-close-btn" class="px-4 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-900 border border-slate-600/80 text-slate-200 text-xs sm:text-sm font-bold backdrop-blur-md shadow-lg transition cursor-pointer">
-        返回棋盤重溫路線
-      </button>
-      <button id="coronation-replay-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xs sm:text-sm font-black shadow-lg shadow-amber-500/30 transition cursor-pointer">
-        🔄 從第 1 關開啟新傳說
+      <button id="coronation-home-btn" type="button" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-xs shadow transition cursor-pointer">
+        🏠 回主畫面看圖鑑
       </button>
     </div>
   </div>
 
   <script>
-    // ==========================================
-    // 1. RADICAL ALGEBRA & SIMPLIFICATION ENGINE
-    // ==========================================
+    // =========================================================================
+    // 1. STORAGE, ROUTING & ASSET CONFIGURATION (Synced with index.html)
+    // =========================================================================
+    const SAVE_STORAGE_KEY = 'afar_triangle_save_v1';
+    const HOME_PAGE_URL = 'index.html';
+    const TOTAL_LEVELS = 50;
+
+    // Enforce entry from home page on cold reopen so mobile session restore never traps user
+    (function enforceHomeEntry() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const fromHome = sessionStorage.getItem('savanna_entered_from_home') === '1';
+        if (!fromHome && !params.has('level')) {
+          window.location.replace(`${HOME_PAGE_URL}?t=${Date.now()}`);
+        }
+      } catch (e) {}
+    })();
+
+    const CHAPTER_MILESTONES = [
+      { id: 1, start: 1,  end: 10, title: '草原初啼', rank: '見習幼獅',     icon: '🐾', files: ['image/milestone_10.png', 'image/milestone_10.jpg'] },
+      { id: 2, start: 11, end: 20, title: '迷霧探險', rank: '荒原獵手',     icon: '🧭', files: ['image/milestone_20.png', 'image/milestone_20.jpg'] },
+      { id: 3, start: 21, end: 30, title: '綠洲守護', rank: '三角洲衛士',   icon: '🌴', files: ['image/milestone_30.png', 'image/milestone_30.jpg'] },
+      { id: 4, start: 31, end: 40, title: '群獅領袖', rank: '草原統領',     icon: '🔥', files: ['image/milestone_40.png', 'image/milestone_40.jpg'] },
+      { id: 5, start: 41, end: 50, title: '榮耀加冕', rank: '大草原獅子王', icon: '👑', files: ['image/coronation.png', 'image/coronation.jpg'] }
+    ];
+
+    // Optional sprite images in image/ folder (graceful vector/emoji fallback if absent)
+    const SPRITES = {
+      lion: null,
+      palm: null,
+      rock: null,
+      lake: null
+    };
+
+    function loadSprite(key, candidates) {
+      let idx = 0;
+      const tryNext = () => {
+        if (idx >= candidates.length) return;
+        const img = new Image();
+        img.onload = () => {
+          SPRITES[key] = img;
+          drawBoard();
+        };
+        img.onerror = () => {
+          idx++;
+          tryNext();
+        };
+        img.src = candidates[idx];
+      };
+      tryNext();
+    }
+
+    loadSprite('lion', ['image/lion.png', 'image/lion.jpg']);
+    loadSprite('palm', ['image/palm.png', 'image/palm.jpg']);
+    loadSprite('rock', ['image/rock.png', 'image/rock.jpg']);
+    loadSprite('lake', ['image/lake.png', 'image/lake.jpg']);
+
+    function readSaveData() {
+      try {
+        const raw = localStorage.getItem(SAVE_STORAGE_KEY);
+        if (!raw) return { currentLevel: 1, stars: {} };
+        const parsed = JSON.parse(raw);
+        return {
+          currentLevel: Math.min(TOTAL_LEVELS, Math.max(1, Number(parsed.currentLevel) || 1)),
+          stars: (parsed.stars && typeof parsed.stars === 'object') ? parsed.stars : {}
+        };
+      } catch (e) {
+        return { currentLevel: 1, stars: {} };
+      }
+    }
+
+    function writeSaveData(data) {
+      try {
+        localStorage.setItem(SAVE_STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // 2. EXACT RADICAL ARITHMETIC ENGINE (Pythagorean Segment Simplifier)
+    // =========================================================================
+    // Expresses any Euclidean segment length sqrt(dx^2 + dy^2) = k * sqrt(m)
+    // where m is square-free, and sums segments into canonical map { m: k }.
     function simplifyRadical(n) {
-      if (n === 0) return { coeff: 0, rad: 1 };
-      let coeff = 1;
-      let rad = n;
-      for (let d = 2; d * d <= rad; d++) {
-        while (rad % (d * d) === 0) {
-          coeff *= d;
-          rad /= d * d;
+      if (n === 0) return { k: 0, m: 1 };
+      let k = 1;
+      let m = n;
+      for (let d = 2; d * d <= m; d++) {
+        while (m % (d * d) === 0) {
+          k *= d;
+          m /= (d * d);
         }
       }
-      return { coeff, rad };
+      return { k, m };
     }
 
-    function formatSingleTerm(coeff, rad) {
-      if (coeff === 0) return "0";
-      if (rad === 1) return `${coeff}`;
-      return coeff === 1 ? `√${rad}` : `${coeff}√${rad}`;
+    function segmentRadical(p1, p2) {
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      return simplifyRadical(dx * dx + dy * dy);
     }
 
-    function computePathTerms(points) {
-      const termMap = new Map();
+    function computePathRadicalMap(points) {
+      const terms = {};
       for (let i = 0; i < points.length - 1; i++) {
-        const dx = points[i + 1].x - points[i].x;
-        const dy = points[i + 1].y - points[i].y;
-        const distSq = dx * dx + dy * dy;
-        const { coeff, rad } = simplifyRadical(distSq);
-        termMap.set(rad, (termMap.get(rad) || 0) + coeff);
+        const { k, m } = segmentRadical(points[i], points[i + 1]);
+        if (k > 0) {
+          terms[m] = (terms[m] || 0) + k;
+        }
       }
-      return termMap;
+      return terms;
     }
 
-    function formatRadicalMap(termMap) {
-      if (!termMap || termMap.size === 0) return "0";
-      const entries = Array.from(termMap.entries())
-        .filter(([, coeff]) => coeff > 0)
-        .sort((a, b) => {
-          if (a[0] === 1) return -1;
-          if (b[0] === 1) return 1;
-          return a[0] - b[0];
-        });
-      if (entries.length === 0) return "0";
-      return entries.map(([rad, coeff]) => formatSingleTerm(coeff, rad)).join(" + ");
+    function formatRadicalMap(terms) {
+      const keys = Object.keys(terms)
+        .map(Number)
+        .filter(m => terms[m] > 0)
+        .sort((a, b) => a - b);
+
+      if (keys.length === 0) return '0';
+
+      return keys.map(m => {
+        const k = terms[m];
+        if (m === 1) return `${k}`;
+        return k === 1 ? `√${m}` : `${k}√${m}`;
+      }).join(' + ');
     }
 
-    function approxRadicalMap(termMap) {
-      let sum = 0;
-      for (const [rad, coeff] of termMap.entries()) {
-        sum += coeff * Math.sqrt(rad);
-      }
-      return sum;
-    }
-
-    function areRadicalMapsEqual(mapA, mapB) {
-      const keysA = Array.from(mapA.keys()).filter(k => mapA.get(k) > 0);
-      const keysB = Array.from(mapB.keys()).filter(k => mapB.get(k) > 0);
+    function areRadicalMapsEqual(a, b) {
+      const keysA = Object.keys(a).filter(k => a[k] > 0);
+      const keysB = Object.keys(b).filter(k => b[k] > 0);
       if (keysA.length !== keysB.length) return false;
       for (const k of keysA) {
-        if (mapA.get(k) !== mapB.get(k)) return false;
+        if (a[k] !== b[k]) return false;
       }
       return true;
     }
 
-    // ==========================================
-    // 2. 50 UNIQUE ALGORITHMIC LEVELS GENERATOR
-    // ==========================================
-    function segmentHitsObstacle(ax, ay, bx, by, obstacles) {
-      if (!obstacles || obstacles.length === 0) return false;
-      const clearance = 0.42;
-      const dx = bx - ax;
-      const dy = by - ay;
-      const lenSq = dx * dx + dy * dy;
+    // =========================================================================
+    // 3. DETERMINISTIC 50-LEVEL PROCEDURAL GENERATOR (Guaranteed Solvable)
+    // =========================================================================
+    function createSeededRng(seed) {
+      let s = seed >>> 0;
+      return function() {
+        s = (s * 1664525 + 1013904223) >>> 0;
+        return s / 4294967296;
+      };
+    }
 
-      for (const obs of obstacles) {
-        if ((obs.x === ax && obs.y === ay) || (obs.x === bx && obs.y === by)) return true;
-        if (lenSq === 0) continue;
+    function pointKey(p) {
+      return `${p.x},${p.y}`;
+    }
 
-        let t = ((obs.x - ax) * dx + (obs.y - ay) * dy) / lenSq;
-        t = Math.max(0, Math.min(1, t));
-        const projX = ax + t * dx;
-        const projY = ay + t * dy;
-        const dist = Math.hypot(obs.x - projX, obs.y - projY);
-        if (dist < clearance) return true;
+    // Check whether segment AB passes directly through any blocked grid vertex
+    function segmentHitsObstacle(a, b, blockedSet) {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const g = gcd(Math.abs(dx), Math.abs(dy));
+      const sx = dx / g;
+      const sy = dy / g;
+      for (let step = 1; step <= g; step++) {
+        const cx = a.x + sx * step;
+        const cy = a.y + sy * step;
+        if (blockedSet.has(`${cx},${cy}`)) return true;
       }
       return false;
     }
 
-    const HANDCRAFTED_LEVELS = [
-      {
-        title: "初探草原：自由拆併",
-        gridSize: 6,
-        start: { x: 0, y: 0 },
-        end: { x: 5, y: 5 },
-        maxSteps: 6,
-        obstacles: [],
-        solution: [{ x: 0, y: 0 }, { x: 0, y: 2 }, { x: 2, y: 3 }, { x: 4, y: 4 }, { x: 5, y: 5 }],
-        hint: "6×6 純淨草原！目標總長 2 + 2√5 + √2。你可以一次走 2 格，也可拆成兩次 1 格轉彎，過程中不會顯示距離，抵達椰子樹才揭曉！"
-      },
-      {
-        title: "雙斜線交響曲",
-        gridSize: 6,
-        start: { x: 0, y: 5 },
-        end: { x: 5, y: 0 },
-        maxSteps: 6,
-        obstacles: [],
-        solution: [{ x: 0, y: 5 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 5, y: 1 }, { x: 5, y: 0 }],
-        hint: "觀察同類項合併：2√2 可以一次跨 (2,2)，也可以拆成兩步 (1,1) 調整轉折角度。"
-      },
-      {
-        title: "邊界陷阱：2√13 拆解",
-        gridSize: 6,
-        start: { x: 0, y: 0 },
-        end: { x: 5, y: 5 },
-        maxSteps: 4,
-        obstacles: [],
-        solution: [{ x: 0, y: 0 }, { x: 3, y: 2 }, { x: 5, y: 5 }],
-        hint: "一步走完 2√13 需要 (6,4) 會超出 6×6 草原邊界！必須拆成兩次不同方向的 √13（跨度 3 與 2）。"
-      },
-      {
-        title: "日字跳躍：2√10 拆解",
-        gridSize: 6,
-        start: { x: 1, y: 0 },
-        end: { x: 5, y: 4 },
-        maxSteps: 4,
-        obstacles: [],
-        solution: [{ x: 1, y: 0 }, { x: 4, y: 1 }, { x: 5, y: 4 }],
-        hint: "√10 來自 3² + 1²。一次走 2√10 會衝出邊界，試著用「橫向 (3,1)」搭配「直向 (1,3)」完成折線！"
-      },
-      {
-        title: "巨岩阻路：繞行拆解",
-        gridSize: 6,
-        start: { x: 0, y: 0 },
-        end: { x: 4, y: 4 },
-        maxSteps: 4,
-        obstacles: [
-          { x: 2, y: 2, type: 'rock' },
-          { x: 1, y: 3, type: 'lake' }
-        ],
-        solution: [{ x: 0, y: 0 }, { x: 3, y: 1 }, { x: 4, y: 4 }],
-        hint: "中央 (2,2) 被巨岩擋住，無法直拉對角線！試著利用兩段 √10 折線繞過岩石抵達椰子樹。"
-      },
-      {
-        title: "湖畔迷蹤：√17 與 √8",
-        gridSize: 6,
-        start: { x: 0, y: 0 },
-        end: { x: 5, y: 5 },
-        maxSteps: 5,
-        obstacles: [
-          { x: 2, y: 3, type: 'lake' },
-          { x: 3, y: 2, type: 'rock' }
-        ],
-        solution: [{ x: 0, y: 0 }, { x: 1, y: 4 }, { x: 3, y: 4 }, { x: 5, y: 5 }],
-        hint: "4² + 1² = 17（長度 √17）。避開中央岩石與湖泊，先拉出 (1,4) 的大斜線，再補上 2 與 √5。"
+    function gcd(a, b) {
+      while (b !== 0) {
+        const t = b;
+        b = a % b;
+        a = t;
       }
-    ];
+      return a || 1;
+    }
 
-    function build50UniqueLevels() {
-      const levels = [];
-      const seenSignatures = new Set();
+    // Generate all 50 levels deterministically with valid optimal solution paths
+    const LEVELS = [];
 
-      for (const item of HANDCRAFTED_LEVELS) {
-        const targetMap = computePathTerms(item.solution);
-        const formulaStr = formatRadicalMap(targetMap);
-        const sig = `${item.gridSize}|${item.start.x},${item.start.y}->${item.end.x},${item.end.y}|${formulaStr}`;
-        seenSignatures.add(sig);
-        levels.push({
-          ...item,
-          id: levels.length + 1,
-          targetMap,
-          formulaStr
-        });
-      }
+    (function buildAllLevels() {
+      for (let lv = 1; lv <= TOTAL_LEVELS; lv++) {
+        const rng = createSeededRng(2026000 + lv * 7919);
 
-      let seed = 20261113;
-      function rand() {
-        seed = (seed * 1664525 + 1013904223) % 4294967296;
-        return seed / 4294967296;
-      }
-      function randInt(min, max) {
-        return Math.floor(rand() * (max - min + 1)) + min;
-      }
+        // Grid size scales smoothly from 4x4 up to 7x7
+        let gridSize = 4;
+        if (lv >= 11 && lv <= 22) gridSize = 5;
+        else if (lv >= 23 && lv <= 38) gridSize = 6;
+        else if (lv >= 39) gridSize = 7;
 
-      const themesByTier = {
-        6: ["草原微風", "金合歡樹影", "獅群巡禮", "夕陽斜線"],
-        7: ["湖畔繞行", "巨岩迷蹤", "水窪折返", "稀樹草原挑戰"],
-        8: ["大遷徙試煉", "峽谷巨石陣", "綠洲奇蹟", "草原宗師試煉"]
-      };
+        // Optimal steps scale from 2 up to 5
+        let optimalSteps = 2;
+        if (lv >= 8 && lv <= 18) optimalSteps = 3;
+        else if (lv >= 19 && lv <= 36) optimalSteps = 4;
+        else if (lv >= 37) optimalSteps = 5;
 
-      const candidateVectors = [];
-      for (let dx = -5; dx <= 5; dx++) {
-        for (let dy = -5; dy <= 5; dy++) {
-          if (dx === 0 && dy === 0) continue;
-          const d2 = dx * dx + dy * dy;
-          if (d2 <= 29) {
-            candidateVectors.push({ dx, dy, d2 });
-          }
-        }
-      }
+        let built = null;
 
-      let attempts = 0;
-      while (levels.length < 50 && attempts < 18000) {
-        attempts++;
-        const nextLevelNum = levels.length + 1;
+        for (let attempt = 0; attempt < 250 && !built; attempt++) {
+          const start = {
+            x: Math.floor(rng() * gridSize),
+            y: Math.floor(rng() * gridSize)
+          };
 
-        let gridSize = 6;
-        let obstacleCount = 0;
-        if (nextLevelNum >= 31) {
-          gridSize = 8;
-          obstacleCount = randInt(4, 7);
-        } else if (nextLevelNum >= 11) {
-          gridSize = 7;
-          obstacleCount = randInt(2, 4);
-        } else {
-          gridSize = 6;
-          obstacleCount = randInt(2, 3);
-        }
+          const path = [start];
+          const usedNodes = new Set([pointKey(start)]);
+          const usedRadicals = new Set();
 
-        const maxCoord = gridSize - 1;
-        const numSegments = nextLevelNum <= 10
-          ? randInt(2, 3)
-          : nextLevelNum <= 30
-            ? randInt(3, 4)
-            : randInt(3, 5);
+          for (let step = 0; step < optimalSteps; step++) {
+            const curr = path[path.length - 1];
+            const candidates = [];
 
-        const start = {
-          x: randInt(0, maxCoord),
-          y: randInt(0, maxCoord)
-        };
+            for (let nx = 0; nx < gridSize; nx++) {
+              for (let ny = 0; ny < gridSize; ny++) {
+                const kStr = `${nx},${ny}`;
+                if (usedNodes.has(kStr)) continue;
+                const distSq = (nx - curr.x) ** 2 + (ny - curr.y) ** 2;
+                // Keep step lengths visually clean & varied
+                if (distSq === 0 || distSq > 18) continue;
+                const rad = simplifyRadical(distSq);
+                // Prefer varied radical types on higher levels
+                const weight = usedRadicals.has(rad.m) ? 1 : 4;
+                for (let w = 0; w < weight; w++) {
+                  candidates.push({ x: nx, y: ny, m: rad.m });
+                }
+              }
+            }
 
-        const path = [{ ...start }];
-        const visitedKeys = new Set([`${start.x},${start.y}`]);
-        let validPath = true;
-
-        for (let s = 0; s < numSegments; s++) {
-          const curr = path[path.length - 1];
-          const shuffled = [...candidateVectors].sort(() => rand() - 0.5);
-          let picked = null;
-
-          for (const v of shuffled) {
-            const nx = curr.x + v.dx;
-            const ny = curr.y + v.dy;
-            if (nx < 0 || nx > maxCoord || ny < 0 || ny > maxCoord) continue;
-            const key = `${nx},${ny}`;
-            if (visitedKeys.has(key)) continue;
-            if (nextLevelNum >= 11 && v.d2 < 2) continue;
-            picked = { x: nx, y: ny };
-            break;
+            if (candidates.length === 0) break;
+            const pick = candidates[Math.floor(rng() * candidates.length)];
+            path.push({ x: pick.x, y: pick.y });
+            usedNodes.add(pointKey(pick));
+            usedRadicals.add(pick.m);
           }
 
-          if (!picked) {
-            validPath = false;
-            break;
-          }
-          visitedKeys.add(`${picked.x},${picked.y}`);
-          path.push(picked);
-        }
+          if (path.length !== optimalSteps + 1) continue;
 
-        if (!validPath) continue;
-        const end = path[path.length - 1];
-        if (Math.hypot(end.x - start.x, end.y - start.y) < (gridSize >= 7 ? 3 : 2)) continue;
+          const goal = path[path.length - 1];
+          // Ensure direct straight jump from start to goal doesn't accidentally equal the multi-step sum
+          const directTerms = computePathRadicalMap([start, goal]);
+          const targetTerms = computePathRadicalMap(path);
+          if (areRadicalMapsEqual(directTerms, targetTerms)) continue;
 
-        const obstacles = [];
-        if (obstacleCount > 0) {
-          const freeNodes = [];
-          for (let gx = 0; gx <= maxCoord; gx++) {
-            for (let gy = 0; gy <= maxCoord; gy++) {
-              if (gx === start.x && gy === start.y) continue;
-              if (gx === end.x && gy === end.y) continue;
-              freeNodes.push({ x: gx, y: gy });
+          // Place Savanna Obstacles (Rocks & Lakes) on unused nodes
+          const maxObstacles = Math.min(
+            Math.floor(gridSize * gridSize * 0.24),
+            Math.floor((lv - 1) / 4) + 1
+          );
+          const obstacles = [];
+          const blockedSet = new Set();
+
+          const freeCells = [];
+          for (let x = 0; x < gridSize; x++) {
+            for (let y = 0; y < gridSize; y++) {
+              if (!usedNodes.has(`${x},${y}`)) {
+                freeCells.push({ x, y });
+              }
             }
           }
-          freeNodes.sort(() => rand() - 0.5);
 
-          for (const node of freeNodes) {
-            if (obstacles.length >= obstacleCount) break;
-            const candidateObs = {
-              x: node.x,
-              y: node.y,
-              type: rand() > 0.48 ? 'rock' : 'lake'
-            };
+          // Shuffle free cells
+          for (let i = freeCells.length - 1; i > 0; i--) {
+            const j = Math.floor(rng() * (i + 1));
+            [freeCells[i], freeCells[j]] = [freeCells[j], freeCells[i]];
+          }
+
+          for (const cell of freeCells) {
+            if (obstacles.length >= maxObstacles) break;
+            const testBlocked = new Set(blockedSet);
+            testBlocked.add(pointKey(cell));
+
+            // Verify none of the golden solution segments pass through this obstacle
             let blocksSolution = false;
             for (let i = 0; i < path.length - 1; i++) {
-              if (segmentHitsObstacle(path[i].x, path[i].y, path[i + 1].x, path[i + 1].y, [candidateObs])) {
+              if (segmentHitsObstacle(path[i], path[i + 1], testBlocked)) {
                 blocksSolution = true;
                 break;
               }
             }
+
             if (!blocksSolution) {
-              obstacles.push(candidateObs);
+              blockedSet.add(pointKey(cell));
+              obstacles.push({
+                x: cell.x,
+                y: cell.y,
+                type: obstacles.length % 2 === 0 ? 'rock' : 'lake'
+              });
             }
           }
-          if (obstacles.length < Math.min(2, obstacleCount)) continue;
+
+          built = {
+            level: lv,
+            gridSize,
+            start,
+            goal,
+            obstacles,
+            optimalSteps,
+            maxSteps: optimalSteps + 2,
+            targetTerms,
+            targetFormula: formatRadicalMap(targetTerms),
+            solutionPath: path
+          };
         }
 
-        const targetMap = computePathTerms(path);
-        const formulaStr = formatRadicalMap(targetMap);
-
-        let hasIrrational = false;
-        for (const [rad] of targetMap.entries()) {
-          if (rad > 1) hasIrrational = true;
-        }
-        if (!hasIrrational) continue;
-
-        const sig = `${gridSize}|${start.x},${start.y}->${end.x},${end.y}|${formulaStr}`;
-        if (seenSignatures.has(sig)) continue;
-        seenSignatures.add(sig);
-
-        // Give generous headroom (+2 steps) over the minimal master solution so players can freely split terms
-        const maxSteps = numSegments + 2;
-        const themePool = themesByTier[gridSize];
-        const themeTitle = themePool[(levels.length) % themePool.length];
-
-        let hintText = `本關為 ${gridSize}×${gridSize} 草原地圖，最簡宗師解為 ${numSegments} 步，上限 ${maxSteps} 步。`;
-        if (obstacles.length > 0) {
-          hintText += ` 地圖上有 ${obstacles.length} 處岩石/湖泊禁區，路線不可穿越或踩踏，善用根式拆解繞行！`;
-        } else {
-          hintText += ` 善用畢氏定理拆解斜線長度，抵達椰子樹後會自動揭曉每段距離！`;
+        // Ultra-safe deterministic fallback if random search ever missed
+        if (!built) {
+          const path = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }];
+          const targetTerms = computePathRadicalMap(path);
+          built = {
+            level: lv,
+            gridSize: 4,
+            start: path[0],
+            goal: path[2],
+            obstacles: [{ x: 1, y: 0, type: 'rock' }],
+            optimalSteps: 2,
+            maxSteps: 4,
+            targetTerms,
+            targetFormula: formatRadicalMap(targetTerms),
+            solutionPath: path
+          };
         }
 
-        levels.push({
-          id: nextLevelNum,
-          title: `${themeTitle} #${nextLevelNum}`,
-          gridSize,
-          start,
-          end,
-          maxSteps,
-          obstacles,
-          solution: path,
-          targetMap,
-          formulaStr,
-          hint: hintText
-        });
+        LEVELS.push(built);
       }
-
-      return levels;
-    }
-
-    const LEVELS = build50UniqueLevels();
-
-    // ==========================================
-    // 2.5 CUSTOM SPRITE ASSET LOADER (GITHUB READY)
-    // ==========================================
-    // Drop custom transparent PNGs into an `image/` folder next to index.html:
-    // image/lion.png, image/palm.png, image/rock.png, image/lake.png, image/mark.png
-    const CUSTOM_SPRITES = {
-      lion: { src: 'image/lion.png', img: null, ready: false },
-      palm: { src: 'image/palm.png', img: null, ready: false },
-      rock: { src: 'image/rock.png', img: null, ready: false },
-      lake: { src: 'image/lake.png', img: null, ready: false }
-    };
-
-    (function loadBrandMark() {
-      const markImgEl = document.getElementById('custom-mark-img');
-      const defaultIconEl = document.getElementById('default-mark-icon');
-      if (!markImgEl) return;
-      const tester = new Image();
-      tester.onload = () => {
-        markImgEl.src = 'image/mark.png';
-        markImgEl.classList.remove('hidden');
-        if (defaultIconEl) defaultIconEl.classList.add('hidden');
-      };
-      tester.src = 'image/mark.png';
     })();
 
-    Object.values(CUSTOM_SPRITES).forEach(entry => {
-      const image = new Image();
-      image.onload = () => {
-        entry.img = image;
-        entry.ready = true;
-        if (typeof render === 'function') render();
-      };
-      image.onerror = () => {
-        entry.ready = false;
-      };
-      image.src = entry.src;
-    });
+    // =========================================================================
+    // 4. GAME STATE & SOUND FEEDBACK (Web Audio Synthesizer - Zero External URLs)
+    // =========================================================================
+    let saveState = readSaveData();
+    let currentLevelNum = 1;
+    let playerPath = [];
+    let isLevelCleared = false;
+    let showHintPath = false;
 
-    // Preload Bottom-Left Square Brand Mark (image/mark.png)
-    (function loadBrandMark() {
-      const tester = new Image();
-      tester.onload = () => {
-        const markImg = document.getElementById('custom-mark-img');
-        const fallback = document.getElementById('default-mark-fallback');
-        if (markImg) {
-          markImg.src = 'image/mark.png';
-          markImg.classList.remove('hidden');
-        }
-        if (fallback) fallback.classList.add('hidden');
-      };
-      tester.src = 'image/mark.png';
-    })();
+    // Touch / Pointer Drag-to-Move State
+    let isPointerDragging = false;
+    let hoveredNode = null;
+    let pointerPos = null;
 
-    // ==========================================
-    // 3. SOUND EFFECTS (WEB AUDIO API)
-    // ==========================================
     let audioCtx = null;
-    let soundEnabled = true;
-
-    function initAudio() {
-      if (!audioCtx) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) audioCtx = new AudioContext();
-      }
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-    }
-
-    function playTone(type) {
-      if (!soundEnabled) return;
-      initAudio();
-      if (!audioCtx) return;
-
-      const now = audioCtx.currentTime;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      if (type === 'step') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(420, now);
-        osc.frequency.exponentialRampToValueAtTime(640, now + 0.08);
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
-        osc.start(now);
-        osc.stop(now + 0.1);
-      } else if (type === 'undo') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(360, now);
-        osc.frequency.exponentialRampToValueAtTime(220, now + 0.09);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-        osc.start(now);
-        osc.stop(now + 0.11);
-      } else if (type === 'error') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(160, now);
-        osc.frequency.linearRampToValueAtTime(110, now + 0.18);
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-        osc.start(now);
-        osc.stop(now + 0.21);
-      } else if (type === 'win') {
-        const notes = [523.25, 659.25, 783.99, 1046.5];
-        notes.forEach((freq, idx) => {
-          const o = audioCtx.createOscillator();
-          const g = audioCtx.createGain();
-          o.connect(g);
-          g.connect(audioCtx.destination);
-          o.type = 'triangle';
-          o.frequency.setValueAtTime(freq, now + idx * 0.09);
-          g.gain.setValueAtTime(0.14, now + idx * 0.09);
-          g.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.28);
-          o.start(now + idx * 0.09);
-          o.stop(now + idx * 0.09 + 0.3);
-        });
-      }
-    }
-
-    // ==========================================
-    // 4. STATE & DOM REFERENCES
-    // ==========================================
-    const state = {
-      currentLevelIndex: 0,
-      path: [],
-      isDragging: false,
-      hoverNode: null,
-      pointerPos: null,
-      isGameOver: false,
-      revealLengths: false,
-      completedLevels: new Set(),
-      canvasMetrics: { size: 300, padding: 30, cellSpacing: 48, gridSize: 6 }
-    };
-
-    const canvas = document.getElementById('game-canvas');
-    const ctx = canvas.getContext('2d');
-    const canvasWrapper = document.getElementById('canvas-wrapper');
-    const levelSelectorEl = document.getElementById('level-selector');
-    const gridSizeBadgeEl = document.getElementById('grid-size-badge');
-    const legendObstacleEl = document.getElementById('legend-obstacle');
-    const levelTitleEl = document.getElementById('level-title');
-    const targetFormulaEl = document.getElementById('target-formula');
-    const approxTargetEl = document.getElementById('approx-target');
-    const currentFormulaDisplayEl = document.getElementById('current-formula-display');
-    const stepCounterEl = document.getElementById('step-counter');
-    const optimalStepDisplayEl = document.getElementById('optimal-step-display');
-    const stepLogListEl = document.getElementById('step-log-list');
-    const blindStatusBadgeEl = document.getElementById('blind-status-badge');
-    const undoBtn = document.getElementById('undo-btn');
-    const resetBtn = document.getElementById('reset-btn');
-    const canvasToastEl = document.getElementById('canvas-toast');
-
-    let toastTimeout = null;
-    function showToast(msg) {
-      canvasToastEl.textContent = msg;
-      canvasToastEl.style.opacity = '1';
-      clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        canvasToastEl.style.opacity = '0';
-      }, 2200);
-    }
-
-    // ==========================================
-    // 5. LEVEL LOADING & UI UPDATES
-    // ==========================================
-    function loadLevel(index) {
-      state.currentLevelIndex = Math.max(0, Math.min(LEVELS.length - 1, index));
-      const level = LEVELS[state.currentLevelIndex];
-
-      state.path = [{ x: level.start.x, y: level.start.y }];
-      state.isDragging = false;
-      state.hoverNode = null;
-      state.pointerPos = null;
-      state.isGameOver = false;
-      state.isWon = false;
-      state.revealLengths = false;
-
-      if (gridSizeBadgeEl) {
-        gridSizeBadgeEl.textContent = `${level.gridSize}×${level.gridSize}`;
-      }
-      if (legendObstacleEl) {
-        if (level.obstacles && level.obstacles.length > 0) {
-          legendObstacleEl.classList.remove('hidden');
-        } else {
-          legendObstacleEl.classList.add('hidden');
+    function playTone(freq, duration = 0.11, type = 'sine', gainVal = 0.08) {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
-      }
-
-      const optimalSteps = level.solution.length - 1;
-      if (optimalStepDisplayEl) {
-        optimalStepDisplayEl.textContent = `${optimalSteps} 步`;
-      }
-
-      levelTitleEl.textContent = `關卡 ${level.id} / ${LEVELS.length} · ${level.title}`;
-      if (targetFormulaEl) targetFormulaEl.textContent = level.formulaStr;
-      if (approxTargetEl) approxTargetEl.textContent = `≈ ${approxRadicalMap(level.targetMap).toFixed(2)}`;
-      const hintTextEl = document.getElementById('hint-text');
-      if (hintTextEl) hintTextEl.textContent = level.hint;
-
-      hideInlineResult();
-      stopConfetti();
-      buildLevelButtons();
-      scrollToActiveLevelButton();
-      resizeCanvas();
-      updateUI();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
     }
 
-    function buildLevelButtons() {
-      levelSelectorEl.innerHTML = '';
-      LEVELS.forEach((lvl, idx) => {
+    function playWinFanfare() {
+      playTone(523.25, 0.14, 'triangle', 0.1);
+      setTimeout(() => playTone(659.25, 0.14, 'triangle', 0.1), 110);
+      setTimeout(() => playTone(783.99, 0.16, 'triangle', 0.1), 220);
+      setTimeout(() => playTone(1046.5, 0.32, 'triangle', 0.12), 340);
+    }
+
+    // =========================================================================
+    // 5. LEVEL LOADING, STAR EVALUATION & UI RENDERING
+    // =========================================================================
+    function getLevelConfig(lvNum) {
+      return LEVELS[Math.min(TOTAL_LEVELS, Math.max(1, lvNum)) - 1];
+    }
+
+    function getTotalStarsCount() {
+      return Object.keys(saveState.stars).reduce((acc, k) => {
+        const s = Number(saveState.stars[k]) || 0;
+        return acc + Math.min(3, Math.max(0, s));
+      }, 0);
+    }
+
+    function renderLevelStrip() {
+      const strip = document.getElementById('level-strip');
+      strip.innerHTML = '';
+
+      for (let lv = 1; lv <= TOTAL_LEVELS; lv++) {
+        const cfg = getLevelConfig(lv);
+        const earned = Math.min(3, Math.max(0, Number(saveState.stars[lv]) || 0));
+        const isCurrent = lv === currentLevelNum;
+
         const btn = document.createElement('button');
-        const isCurrent = idx === state.currentLevelIndex;
-        const isCompleted = state.completedLevels.has(lvl.id);
-        btn.className = `px-2 py-1 rounded-lg text-[11px] sm:text-xs font-extrabold transition shrink-0 flex items-center gap-1 ${
-          isCurrent
-            ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/30'
-            : isCompleted
-              ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25'
-              : 'bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700'
-        }`;
-        btn.innerHTML = `<span>${lvl.id}</span><span class="text-[9px] opacity-75">${lvl.gridSize}×</span>${isCompleted ? '<span class="text-[9px]">★</span>' : ''}`;
-        btn.title = `第 ${lvl.id} 關 (${lvl.gridSize}×${lvl.gridSize}): ${lvl.title}`;
-        btn.addEventListener('click', () => {
-          initAudio();
-          loadLevel(idx);
-        });
-        levelSelectorEl.appendChild(btn);
-      });
-    }
+        btn.type = 'button';
+        btn.dataset.level = lv;
 
-    function scrollToActiveLevelButton() {
-      const activeBtn = levelSelectorEl.children[state.currentLevelIndex];
-      if (activeBtn) {
-        activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-      }
-    }
-
-    function updateUI() {
-      const level = LEVELS[state.currentLevelIndex];
-      const stepsTaken = state.path.length - 1;
-      stepCounterEl.textContent = `${stepsTaken} / ${level.maxSteps}`;
-      stepCounterEl.className = stepsTaken >= level.maxSteps
-        ? 'font-mono text-base sm:text-lg font-black text-amber-400'
-        : 'font-mono text-base sm:text-lg font-black text-white';
-
-      // Allow undo even after a failed/mismatch attempt so player can tweak directly on the board!
-      undoBtn.disabled = stepsTaken === 0 || state.isWon;
-
-      if (state.revealLengths) {
-        const playerMap = computePathTerms(state.path);
-        const isMatch = areRadicalMapsEqual(playerMap, level.targetMap);
-        currentFormulaDisplayEl.textContent = formatRadicalMap(playerMap);
-        currentFormulaDisplayEl.className = isMatch
-          ? 'font-mono text-xs sm:text-sm font-extrabold text-emerald-300 truncate'
-          : 'font-mono text-xs sm:text-sm font-extrabold text-rose-300 truncate';
-        blindStatusBadgeEl.textContent = '距離已直接標示於棋盤';
-        blindStatusBadgeEl.className = 'text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
-      } else {
-        currentFormulaDisplayEl.textContent = stepsTaken === 0 ? '尚未出發' : `🔒 已走 ${stepsTaken} 段（終點揭曉）`;
-        currentFormulaDisplayEl.className = 'font-mono text-xs sm:text-sm font-extrabold text-amber-300 truncate';
-        blindStatusBadgeEl.textContent = '盲算模式中';
-        blindStatusBadgeEl.className = 'text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20';
-      }
-
-      if (stepsTaken === 0) {
-        stepLogListEl.innerHTML = '<span class="text-xs text-slate-500 italic">點擊或拖曳小獅 🦁 開始前進...</span>';
-      } else {
-        stepLogListEl.innerHTML = '';
-        for (let i = 0; i < stepsTaken; i++) {
-          const dx = state.path[i + 1].x - state.path[i].x;
-          const dy = state.path[i + 1].y - state.path[i].y;
-          const term = simplifyRadical(dx * dx + dy * dy);
-          const label = state.revealLengths ? formatSingleTerm(term.coeff, term.rad) : `第${i + 1}段: ？`;
-          const chip = document.createElement('span');
-          chip.className = state.revealLengths
-            ? 'px-2 py-0.5 rounded-md bg-emerald-500/20 border border-emerald-500/40 font-mono text-xs font-bold text-emerald-200'
-            : 'px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 font-mono text-xs font-bold text-amber-300';
-          chip.textContent = label;
-          stepLogListEl.appendChild(chip);
+        let baseStyle = 'shrink-0 px-2.5 py-1.5 rounded-xl border text-xs font-mono transition flex flex-col items-center justify-center min-w-[56px] cursor-pointer ';
+        if (isCurrent) {
+          baseStyle += 'bg-amber-500/25 border-amber-400 text-amber-200 font-black shadow-md scale-105';
+        } else if (earned > 0) {
+          baseStyle += 'bg-slate-900/90 border-emerald-500/40 text-emerald-300 hover:bg-slate-800';
+        } else {
+          baseStyle += 'bg-slate-950/80 border-slate-800 text-slate-400 hover:bg-slate-900';
         }
+        btn.className = baseStyle;
+
+        const starsHtml = [1, 2, 3].map(idx =>
+          `<span class="${idx <= earned ? 'text-amber-400' : 'text-slate-600'}">★</span>`
+        ).join('');
+
+        btn.innerHTML = `
+          <span class="leading-none">${lv} <span class="text-[10px] opacity-75">${cfg.gridSize}×</span></span>
+          <span class="text-[10px] leading-tight mt-0.5 tracking-tighter">${starsHtml}</span>
+        `;
+        btn.onclick = () => loadLevel(lv);
+        strip.appendChild(btn);
+      }
+
+      // Scroll active level pill smoothly into view
+      const activePill = strip.querySelector(`[data-level="${currentLevelNum}"]`);
+      if (activePill) {
+        activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
     }
 
-    // ==========================================
-    // 6. CANVAS SIZING & COORDINATE MAPPING
-    // ==========================================
-    function resizeCanvas() {
-      const rect = canvasWrapper.getBoundingClientRect();
-      const size = Math.max(240, Math.floor(Math.min(rect.width, rect.height) - 8));
-      const dpr = window.devicePixelRatio || 1;
-
-      canvas.style.width = `${size}px`;
-      canvas.style.height = `${size}px`;
-      canvas.width = Math.floor(size * dpr);
-      canvas.height = Math.floor(size * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      const level = LEVELS[state.currentLevelIndex];
-      const gridSpan = (level ? level.gridSize : 6) - 1;
-      const padding = Math.max(28, Math.round(size * 0.085));
-      const usableSize = size - padding * 2;
-      const cellSpacing = usableSize / gridSpan;
-
-      state.canvasMetrics = {
-        size,
-        padding,
-        cellSpacing,
-        gridSize: level ? level.gridSize : 6
-      };
-      render();
-    }
-
-    function gridToPixel(gx, gy) {
-      const { padding, cellSpacing } = state.canvasMetrics;
-      return {
-        px: padding + gx * cellSpacing,
-        py: padding + gy * cellSpacing
-      };
-    }
-
-    function pixelToNearestNode(px, py) {
-      const { padding, cellSpacing, gridSize } = state.canvasMetrics;
-      if (!cellSpacing) return null;
-
-      const gx = Math.round((px - padding) / cellSpacing);
-      const gy = Math.round((py - padding) / cellSpacing);
-      if (gx < 0 || gx >= gridSize || gy < 0 || gy >= gridSize) return null;
-
-      const level = LEVELS[state.currentLevelIndex];
-      if (level.obstacles && level.obstacles.some(o => o.x === gx && o.y === gy)) {
-        return null;
-      }
-
-      const nodePos = gridToPixel(gx, gy);
-      const dist = Math.hypot(px - nodePos.px, py - nodePos.py);
-      const hitRadius = cellSpacing * 0.45;
-      return dist <= hitRadius ? { x: gx, y: gy } : null;
-    }
-
-    function getPointerCanvasCoords(e) {
-      const rect = canvas.getBoundingClientRect();
-      return {
-        px: e.clientX - rect.left,
-        py: e.clientY - rect.top
-      };
-    }
-
-    // ==========================================
-    // 7. PLAYER INTERACTION & TERMINAL CHECK
-    // ==========================================
-    function tryAddNode(node) {
-      if (state.isWon) return;
-      const level = LEVELS[state.currentLevelIndex];
-      const currentHead = state.path[state.path.length - 1];
-
-      if (node.x === currentHead.x && node.y === currentHead.y) return;
-
-      if (level.obstacles && level.obstacles.some(o => o.x === node.x && o.y === node.y)) {
-        playTone('error');
-        showToast('🪨 該處為岩石/湖泊禁區，無法落腳！');
-        return;
-      }
-
-      if (state.path.length >= 2) {
-        const prevNode = state.path[state.path.length - 2];
-        if (node.x === prevNode.x && node.y === prevNode.y) {
-          undoStep();
-          return;
+    function updateHudStars(litCount) {
+      for (let i = 1; i <= 3; i++) {
+        const el = document.getElementById(`hud-star-${i}`);
+        if (i <= litCount) {
+          el.classList.remove('text-slate-600');
+          el.classList.add('text-amber-400');
+        } else {
+          el.classList.remove('text-amber-400');
+          el.classList.add('text-slate-600');
         }
-      }
-
-      if (state.path.length - 1 >= level.maxSteps) {
-        playTone('error');
-        showToast(`⚠️ 已達步數上限 (${level.maxSteps} 步)！請復原或重設`);
-        return;
-      }
-
-      if (segmentHitsObstacle(currentHead.x, currentHead.y, node.x, node.y, level.obstacles)) {
-        playTone('error');
-        canvasWrapper.classList.remove('animate-shake');
-        void canvasWrapper.offsetWidth;
-        canvasWrapper.classList.add('animate-shake');
-        showToast('🚫 路線被岩石或湖泊阻擋，無法直接穿越！');
-        return;
-      }
-
-      state.path.push({ x: node.x, y: node.y });
-      playTone('step');
-
-      if (node.x === level.end.x && node.y === level.end.y) {
-        evaluateTerminalArrival();
-      } else if (state.path.length - 1 >= level.maxSteps) {
-        state.isGameOver = true;
-        state.revealLengths = true;
-        playTone('error');
-        updateUI();
-        render();
-        showInlineResult({
-          win: false,
-          title: '🛑 步數已達上限',
-          desc: `棋盤已標出每段距離！你用完 ${level.maxSteps} 步仍未抵達椰子樹，可直接按「↩️ 復原一步」調整路線。`
-        });
-      } else {
-        state.isGameOver = false;
-        state.revealLengths = false;
-        hideInlineResult();
-        updateUI();
-        render();
-      }
-    }
-
-    function undoStep() {
-      if (state.path.length <= 1 || state.isWon) return;
-      state.path.pop();
-      state.isGameOver = false;
-      state.revealLengths = false;
-      hideInlineResult();
-      playTone('undo');
-      updateUI();
-      render();
-    }
-
-    function evaluateTerminalArrival() {
-      const level = LEVELS[state.currentLevelIndex];
-      state.isGameOver = true;
-      state.revealLengths = true;
-
-      const playerMap = computePathTerms(state.path);
-      const isExactMatch = areRadicalMapsEqual(playerMap, level.targetMap);
-      const stepsUsed = state.path.length - 1;
-      const optimalSteps = level.solution.length - 1;
-      const isBriskSteps = stepsUsed <= optimalSteps + 1;
-      const isOptimalSteps = stepsUsed <= optimalSteps;
-
-      if (isExactMatch) {
-        state.isWon = true;
-        state.completedLevels.add(level.id);
-        buildLevelButtons();
-        playTone('win');
-        startConfetti();
-        const stars = 1 + (isBriskSteps ? 1 : 0) + (isOptimalSteps ? 1 : 0);
-        updateUI();
-        render();
-        showInlineResult({
-          win: true,
-          stars,
-          title: stars === 3 ? '🏆 三星草原宗師！' : stars === 2 ? '🎉 二星俐落通關！' : '🌿 一星成功抵達綠洲！',
-          desc: stars === 3
-            ? `恭喜你以完美最簡 ${stepsUsed} 步抵達椰子樹，離通關成為獅子王更近了一步，棋盤已標示所有線段距離！`
-            : `恭喜你成功以 ${stepsUsed} 步解鎖密碼，離通關成為獅子王更近了一步（${optimalSteps + 1} 步內二星、${optimalSteps} 步內三星宗師）。`
-        });
-      } else {
-        state.isWon = false;
-        playTone('error');
-        updateUI();
-        render();
-        showInlineResult({
-          win: false,
-          title: '⚠️ 抵達終點但密碼不符',
-          desc: `棋盤線上已直接標出你走出的每段距離（總和 ${formatRadicalMap(playerMap)}），可直接按「↩️ 復原一步」修改！`
-        });
-      }
-    }
-
-    // ==========================================
-    // 8. INLINE RESULT BANNER & CONFETTI CELEBRATION
-    // ==========================================
-    function showInlineResult(opts) {
-      const banner = document.getElementById('inline-result-banner');
-      const titleEl = document.getElementById('inline-result-title');
-      const starsEl = document.getElementById('inline-result-stars');
-      const descEl = document.getElementById('inline-result-desc');
-      const nextBtn = document.getElementById('inline-next-btn');
-
-      titleEl.textContent = opts.title;
-      descEl.textContent = opts.desc;
-
-      if (opts.win) {
-        banner.className = 'rounded-xl p-2.5 sm:p-3 border border-emerald-500/50 bg-emerald-950/65 transition-colors flex flex-col justify-between gap-1.5 min-h-[86px] shadow-lg';
-        titleEl.className = 'text-xs sm:text-sm font-black text-emerald-300';
-        starsEl.className = 'font-mono text-base sm:text-lg tracking-widest font-black';
-        starsEl.innerHTML = `<span class="text-amber-400">${'★'.repeat(opts.stars)}</span><span class="text-slate-600">${'★'.repeat(3 - opts.stars)}</span>`;
-        nextBtn.disabled = false;
-        nextBtn.className = 'w-full py-1.5 px-3 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 transition cursor-pointer';
-        nextBtn.textContent = state.currentLevelIndex < LEVELS.length - 1
-          ? `前往第 ${LEVELS[state.currentLevelIndex + 1].id} 關 ➔`
-          : '👑 登上榮耀王座（全畫面加冕儀式）';
-      } else {
-        banner.className = 'rounded-xl p-2.5 sm:p-3 border border-rose-500/50 bg-rose-950/55 transition-colors flex flex-col justify-between gap-1.5 min-h-[86px] shadow-lg';
-        titleEl.className = 'text-xs sm:text-sm font-black text-rose-300';
-        starsEl.className = 'font-mono text-base sm:text-lg tracking-widest font-black';
-        starsEl.innerHTML = '<span class="text-rose-900/80">★★★</span>';
-        nextBtn.disabled = true;
-        nextBtn.className = 'w-full py-1.5 px-3 rounded-lg bg-slate-800/80 text-slate-500 border border-slate-700/60 font-black text-xs sm:text-sm transition disabled:cursor-not-allowed';
-        nextBtn.textContent = '請調整路線後再試';
       }
     }
 
     function hideInlineResult() {
-      const level = LEVELS[state.currentLevelIndex];
-      const optimalSteps = level ? level.solution.length - 1 : 4;
-      const banner = document.getElementById('inline-result-banner');
-      const titleEl = document.getElementById('inline-result-title');
-      const starsEl = document.getElementById('inline-result-stars');
-      const descEl = document.getElementById('inline-result-desc');
-      const nextBtn = document.getElementById('inline-next-btn');
+      const cfg = getLevelConfig(currentLevelNum);
+      const banner = document.getElementById('status-banner');
+      const msgEl = document.getElementById('status-message');
+      const actions = document.getElementById('banner-action-group');
 
-      banner.className = 'rounded-xl p-2.5 sm:p-3 border border-slate-800/90 bg-slate-950/75 transition-colors flex flex-col justify-between gap-1.5 min-h-[86px]';
-      titleEl.className = 'text-xs sm:text-sm font-black text-amber-300';
-      titleEl.textContent = '🧭 草原探險指引';
-      starsEl.className = 'font-mono text-base sm:text-lg tracking-widest font-black';
-      starsEl.innerHTML = '<span class="text-slate-600">★★★</span>';
-      descEl.textContent = `引導小獅抵達椰子樹並吻合密碼；若小獅子以 ${optimalSteps} 步內完成可奪得三星宗師！`;
-      nextBtn.disabled = true;
-      nextBtn.className = 'w-full py-1.5 px-3 rounded-lg bg-slate-800/80 text-slate-500 border border-slate-700/60 font-black text-xs sm:text-sm transition disabled:cursor-not-allowed';
-      nextBtn.textContent = '尚未解鎖下一關';
+      banner.className = 'w-full rounded-2xl bg-slate-900/75 border border-slate-700/70 px-3.5 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm';
+      msgEl.className = 'text-slate-200 font-medium text-center sm:text-left leading-relaxed';
+      msgEl.textContent = `引導小獅抵達椰子樹並吻合密碼；若小獅子以 ${cfg.optimalSteps} 步內完成可奪得三星宗師！`;
+      actions.classList.add('hidden');
     }
 
-    // Simple Canvas Confetti
+    function loadLevel(lvNum) {
+      currentLevelNum = Math.min(TOTAL_LEVELS, Math.max(1, lvNum));
+      const cfg = getLevelConfig(currentLevelNum);
+
+      // Persist current level pointer
+      saveState.currentLevel = currentLevelNum;
+      writeSaveData(saveState);
+
+      playerPath = [{ x: cfg.start.x, y: cfg.start.y }];
+      isLevelCleared = false;
+      showHintPath = false;
+      hoveredNode = null;
+      isPointerDragging = false;
+
+      document.getElementById('header-level-label').textContent = `第 ${currentLevelNum} / ${TOTAL_LEVELS} 關`;
+      document.getElementById('header-total-stars').textContent = `★ ${getTotalStarsCount()} / ${TOTAL_LEVELS * 3}`;
+      document.getElementById('target-formula').textContent = cfg.targetFormula;
+      document.getElementById('steps-limit').textContent = cfg.maxSteps;
+      document.getElementById('steps-optimal').textContent = cfg.optimalSteps;
+
+      const prevBest = Math.min(3, Math.max(0, Number(saveState.stars[currentLevelNum]) || 0));
+      updateHudStars(prevBest);
+
+      hideInlineResult();
+      updateMoveStats();
+      renderLevelStrip();
+      drawBoard();
+    }
+
+    function updateMoveStats() {
+      const cfg = getLevelConfig(currentLevelNum);
+      const stepsUsed = playerPath.length - 1;
+      const currentTerms = computePathRadicalMap(playerPath);
+      const currentFormula = formatRadicalMap(currentTerms);
+
+      document.getElementById('steps-used').textContent = stepsUsed;
+      document.getElementById('current-formula').textContent = currentFormula;
+      document.getElementById('undo-btn').disabled = stepsUsed === 0 || isLevelCleared;
+
+      if (isLevelCleared) return;
+
+      const lastPt = playerPath[playerPath.length - 1];
+      const atGoal = lastPt.x === cfg.goal.x && lastPt.y === cfg.goal.y;
+      const formulaMatches = areRadicalMapsEqual(currentTerms, cfg.targetTerms);
+
+      if (atGoal && formulaMatches) {
+        handleLevelVictory(stepsUsed);
+      } else if (atGoal && !formulaMatches) {
+        showFailureBanner(`抵達椰子樹了，但目前步距「${currentFormula}」與石碑密碼「${cfg.targetFormula}」不符，請退回一步調整路線！`);
+      } else if (stepsUsed >= cfg.maxSteps) {
+        showFailureBanner(`已達本關步數上限（${cfg.maxSteps} 步），請點「退回一步」或「重走本關」再試一次！`);
+      } else {
+        hideInlineResult();
+      }
+    }
+
+    function showFailureBanner(text) {
+      const banner = document.getElementById('status-banner');
+      const msgEl = document.getElementById('status-message');
+      const actions = document.getElementById('banner-action-group');
+
+      banner.className = 'w-full rounded-2xl bg-rose-950/75 border border-rose-500/50 px-3.5 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm';
+      msgEl.className = 'text-rose-200 font-bold text-center sm:text-left leading-relaxed';
+      msgEl.textContent = `⚠️ ${text}`;
+      actions.classList.add('hidden');
+      playTone(220, 0.18, 'sawtooth', 0.06);
+    }
+
+    function handleLevelVictory(stepsUsed) {
+      isLevelCleared = true;
+      isPointerDragging = false;
+      const cfg = getLevelConfig(currentLevelNum);
+
+      // 3-Star Tiered Evaluation:
+      // 3 stars: <= optimalSteps
+      // 2 stars: == optimalSteps + 1
+      // 1 star:  <= maxSteps
+      let earnedStars = 1;
+      if (stepsUsed <= cfg.optimalSteps) {
+        earnedStars = 3;
+      } else if (stepsUsed === cfg.optimalSteps + 1) {
+        earnedStars = 2;
+      }
+
+      const prevStars = Number(saveState.stars[currentLevelNum]) || 0;
+      if (earnedStars > prevStars) {
+        saveState.stars[currentLevelNum] = earnedStars;
+      }
+      if (currentLevelNum < TOTAL_LEVELS) {
+        saveState.currentLevel = Math.max(saveState.currentLevel, currentLevelNum + 1);
+      }
+      writeSaveData(saveState);
+
+      updateHudStars(earnedStars);
+      document.getElementById('header-total-stars').textContent = `★ ${getTotalStarsCount()} / ${TOTAL_LEVELS * 3}`;
+      document.getElementById('undo-btn').disabled = true;
+      renderLevelStrip();
+      playWinFanfare();
+
+      const banner = document.getElementById('status-banner');
+      const msgEl = document.getElementById('status-message');
+      const actions = document.getElementById('banner-action-group');
+      const nextBtn = document.getElementById('next-action-btn');
+
+      banner.className = 'w-full rounded-2xl bg-emerald-950/80 border border-emerald-400/60 px-3.5 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm animate-pop-in';
+      msgEl.className = 'text-emerald-200 font-bold text-center sm:text-left leading-relaxed';
+
+      if (earnedStars === 3) {
+        msgEl.textContent = `恭喜你以完美以最簡 ${stepsUsed} 步抵達椰子樹，離通關成為獅子王更近了一步，棋盤已標示所有線段距離！`;
+      } else {
+        msgEl.textContent = `恭喜你成功以 ${stepsUsed} 步解鎖密碼，離通關成為獅子王更近了一步，（宗師最簡解為 ${cfg.optimalSteps} 步）。`;
+      }
+
+      actions.classList.remove('hidden');
+
+      // Check milestone (10, 20, 30, 40) or Level 50 Grand Coronation
+      if (currentLevelNum === TOTAL_LEVELS) {
+        nextBtn.textContent = '👑 登上榮耀王座（獅子王加冕儀式）';
+        nextBtn.onclick = () => openCoronationScreen();
+      } else if (currentLevelNum % 10 === 0) {
+        const chapter = CHAPTER_MILESTONES.find(ch => ch.end === currentLevelNum);
+        nextBtn.textContent = `🖼️ 領取第 ${chapter.id} 章里程碑畫卷 ➔`;
+        nextBtn.onclick = () => openMilestoneOverlay(chapter);
+      } else {
+        nextBtn.textContent = `前往第 ${currentLevelNum + 1} 關 ➔`;
+        nextBtn.onclick = () => loadLevel(currentLevelNum + 1);
+      }
+
+      drawBoard();
+    }
+
+    // =========================================================================
+    // 6. MILESTONE & LEVEL 50 CORONATION OVERLAYS
+    // =========================================================================
+    function openMilestoneOverlay(chapter) {
+      const overlay = document.getElementById('milestone-overlay');
+      const imgEl = document.getElementById('milestone-img');
+      const fallbackEl = document.getElementById('milestone-fallback');
+
+      document.getElementById('milestone-tag').textContent = `CHAPTER ${chapter.id} · 第 ${chapter.start}～${chapter.end} 關全制霸`;
+      document.getElementById('milestone-title').textContent = `${chapter.title} · 晉升${chapter.rank}`;
+      document.getElementById('milestone-fallback-icon').textContent = chapter.icon;
+      document.getElementById('milestone-fallback-title').textContent = `${chapter.title} · 晉升${chapter.rank}`;
+
+      imgEl.classList.add('hidden');
+      fallbackEl.classList.remove('hidden');
+
+      let idx = 0;
+      const tryLoad = () => {
+        if (idx >= chapter.files.length) return;
+        const probe = new Image();
+        probe.onload = () => {
+          imgEl.src = chapter.files[idx];
+          imgEl.classList.remove('hidden');
+          fallbackEl.classList.add('hidden');
+        };
+        probe.onerror = () => {
+          idx++;
+          tryLoad();
+        };
+        probe.src = chapter.files[idx];
+      };
+      tryLoad();
+
+      document.getElementById('continue-next-chapter-btn').onclick = () => {
+        overlay.classList.add('hidden');
+        loadLevel(chapter.end + 1);
+      };
+
+      overlay.classList.remove('hidden');
+    }
+
+    document.getElementById('close-milestone-btn').addEventListener('click', () => {
+      document.getElementById('milestone-overlay').classList.add('hidden');
+    });
+
     let confettiAnimId = null;
-    function startConfetti() {
+    function startConfettiCelebration() {
       const cCanvas = document.getElementById('confetti-canvas');
-      const cCtx = cCanvas.getContext('2d');
+      const ctx = cCanvas.getContext('2d');
       cCanvas.width = window.innerWidth;
       cCanvas.height = window.innerHeight;
-      const colors = ['#fbbf24', '#34d399', '#f97316', '#38bdf8', '#f472b6'];
-      const particles = Array.from({ length: 75 }, () => ({
+
+      const colors = ['#fbbf24', '#f59e0b', '#34d399', '#fde68a', '#fb7185'];
+      const pieces = Array.from({ length: 90 }, () => ({
         x: Math.random() * cCanvas.width,
         y: Math.random() * cCanvas.height - cCanvas.height,
-        w: Math.random() * 8 + 4,
-        h: Math.random() * 6 + 3,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        vy: Math.random() * 3 + 2,
-        vx: (Math.random() - 0.5) * 2,
+        w: 6 + Math.random() * 7,
+        h: 10 + Math.random() * 10,
+        vy: 1.8 + Math.random() * 3.2,
+        vx: (Math.random() - 0.5) * 1.8,
         rot: Math.random() * Math.PI * 2,
-        vRot: (Math.random() - 0.5) * 0.12
+        vRot: (Math.random() - 0.5) * 0.12,
+        color: colors[Math.floor(Math.random() * colors.length)]
       }));
 
-      function loop() {
-        cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
-        for (const p of particles) {
+      function frame() {
+        ctx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+        for (const p of pieces) {
           p.x += p.vx;
           p.y += p.vy;
           p.rot += p.vRot;
-          if (p.y > cCanvas.height) p.y = -10;
-          cCtx.save();
-          cCtx.translate(p.x, p.y);
-          cCtx.rotate(p.rot);
-          cCtx.fillStyle = p.color;
-          cCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-          cCtx.restore();
-        }
-        confettiAnimId = requestAnimationFrame(loop);
-      }
-      loop();
-    }
-
-    function stopConfetti() {
-      if (confettiAnimId) {
-        cancelAnimationFrame(confettiAnimId);
-        confettiAnimId = null;
-      }
-      const cCanvas = document.getElementById('confetti-canvas');
-      const cCtx = cCanvas.getContext('2d');
-      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
-    }
-
-    // ==========================================
-    // 9. CANVAS RENDERING (SAVANNA & OBSTACLES)
-    // ==========================================
-    function drawSavannaBackdrop(size, padding, cellSpacing, gridSize) {
-      const span = cellSpacing * (gridSize - 1);
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.roundRect(padding - 14, padding - 14, span + 28, span + 28, 18);
-      const savannaGrad = ctx.createLinearGradient(0, padding - 14, 0, padding + span + 14);
-      savannaGrad.addColorStop(0, 'rgba(245, 158, 11, 0.16)');
-      savannaGrad.addColorStop(0.55, 'rgba(217, 119, 6, 0.11)');
-      savannaGrad.addColorStop(1, 'rgba(22, 101, 52, 0.20)');
-      ctx.fillStyle = savannaGrad;
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(251, 191, 36, 0.25)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      // Decorative Acacia tree silhouette in background
-      const treeX = padding + span * 0.82;
-      const treeY = padding + span * 0.24;
-      ctx.fillStyle = 'rgba(120, 53, 15, 0.22)';
-      ctx.beginPath();
-      ctx.ellipse(treeX, treeY - 8, 26, 7, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillRect(treeX - 2, treeY - 6, 4, 14);
-
-      // Subtle savanna grass tufts
-      ctx.strokeStyle = 'rgba(163, 230, 53, 0.18)';
-      ctx.lineWidth = 1.2;
-      for (let i = 1; i < gridSize; i++) {
-        const gx = padding + (i - 0.5) * cellSpacing;
-        const gy = padding + ((i * 2) % (gridSize - 1) + 0.5) * cellSpacing;
-        ctx.beginPath();
-        ctx.moveTo(gx - 3, gy + 3);
-        ctx.lineTo(gx - 5, gy - 3);
-        ctx.moveTo(gx, gy + 3);
-        ctx.lineTo(gx, gy - 4);
-        ctx.moveTo(gx + 3, gy + 3);
-        ctx.lineTo(gx + 5, gy - 2);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-
-    function drawObstacles(obstacles, cellSpacing) {
-      if (!obstacles || obstacles.length === 0) return;
-      const radius = Math.max(15, cellSpacing * 0.38);
-
-      for (const obs of obstacles) {
-        const { px, py } = gridToPixel(obs.x, obs.y);
-        ctx.save();
-
-        // Use custom uploaded sprite if present in assets/
-        const sprite = obs.type === 'lake' ? CUSTOM_SPRITES.lake : CUSTOM_SPRITES.rock;
-        if (sprite && sprite.ready && sprite.img) {
-          const drawSize = radius * 2.3;
-          ctx.drawImage(sprite.img, px - drawSize / 2, py - drawSize / 2, drawSize, drawSize);
-          ctx.restore();
-          continue;
-        }
-
-        if (obs.type === 'lake') {
-          // Sandy shoreline rim
-          ctx.beginPath();
-          ctx.ellipse(px, py + 1, radius * 1.22, radius * 0.96, -0.15, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(217, 169, 98, 0.36)';
-          ctx.fill();
-
-          // Deep oasis water body
-          const lakeGrad = ctx.createRadialGradient(px - radius * 0.25, py - radius * 0.25, 2, px, py, radius * 1.12);
-          lakeGrad.addColorStop(0, '#67e8f9');
-          lakeGrad.addColorStop(0.45, '#0ea5e9');
-          lakeGrad.addColorStop(0.85, '#0369a1');
-          lakeGrad.addColorStop(1, '#0c4a6e');
-
-          ctx.beginPath();
-          ctx.ellipse(px, py, radius * 1.12, radius * 0.86, -0.15, 0, Math.PI * 2);
-          ctx.fillStyle = lakeGrad;
-          ctx.fill();
-          ctx.lineWidth = 1.8;
-          ctx.strokeStyle = 'rgba(186, 230, 253, 0.85)';
-          ctx.stroke();
-
-          // Inner water shimmer ripples
-          ctx.beginPath();
-          ctx.ellipse(px - radius * 0.15, py - radius * 0.12, radius * 0.55, radius * 0.34, -0.15, 0.2, Math.PI * 1.15);
-          ctx.strokeStyle = 'rgba(240, 249, 255, 0.85)';
-          ctx.lineWidth = 1.6;
-          ctx.lineCap = 'round';
-          ctx.stroke();
-
-          ctx.beginPath();
-          ctx.ellipse(px + radius * 0.2, py + radius * 0.18, radius * 0.35, radius * 0.2, -0.15, 0.3, Math.PI * 1.1);
-          ctx.strokeStyle = 'rgba(186, 230, 253, 0.65)';
-          ctx.lineWidth = 1.2;
-          ctx.stroke();
-        } else {
-          // Ground shadow under boulder
-          ctx.beginPath();
-          ctx.ellipse(px + 2, py + radius * 0.58, radius * 1.05, radius * 0.42, 0, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(15, 23, 42, 0.52)';
-          ctx.fill();
-
-          // Warm savanna sandstone boulder silhouette
-          const rockPts = [
-            { a: -2.6, r: 0.92 },
-            { a: -1.8, r: 1.04 },
-            { a: -0.9, r: 0.98 },
-            { a: -0.1, r: 1.06 },
-            { a: 0.7, r: 0.92 },
-            { a: 1.6, r: 0.82 },
-            { a: 2.5, r: 0.88 }
-          ];
-
-          const rockGrad = ctx.createLinearGradient(px - radius, py - radius, px + radius, py + radius);
-          rockGrad.addColorStop(0, '#d6b48c');
-          rockGrad.addColorStop(0.48, '#9a734c');
-          rockGrad.addColorStop(1, '#573d26');
-
-          ctx.beginPath();
-          rockPts.forEach((pt, i) => {
-            const vx = px + Math.cos(pt.a) * radius * pt.r;
-            const vy = py + Math.sin(pt.a) * radius * pt.r;
-            if (i === 0) ctx.moveTo(vx, vy);
-            else ctx.lineTo(vx, vy);
-          });
-          ctx.closePath();
-          ctx.fillStyle = rockGrad;
-          ctx.fill();
-          ctx.lineWidth = 1.8;
-          ctx.strokeStyle = 'rgba(253, 230, 138, 0.55)';
-          ctx.stroke();
-
-          // Top-left sunlight facet highlight
-          ctx.beginPath();
-          ctx.moveTo(px - radius * 0.48, py - radius * 0.18);
-          ctx.lineTo(px - radius * 0.15, py - radius * 0.62);
-          ctx.lineTo(px + radius * 0.32, py - radius * 0.45);
-          ctx.lineTo(px + radius * 0.05, py - radius * 0.05);
-          ctx.closePath();
-          ctx.fillStyle = 'rgba(254, 243, 199, 0.34)';
-          ctx.fill();
-
-          // Small companion pebble
-          ctx.beginPath();
-          ctx.ellipse(px + radius * 0.68, py + radius * 0.48, radius * 0.28, radius * 0.2, 0.3, 0, Math.PI * 2);
-          ctx.fillStyle = '#785636';
-          ctx.fill();
-          ctx.strokeStyle = 'rgba(253, 230, 138, 0.4)';
-          ctx.lineWidth = 1;
-          ctx.stroke();
-        }
-
-        ctx.restore();
-      }
-    }
-
-    function render() {
-      const { size, padding, cellSpacing, gridSize } = state.canvasMetrics;
-      if (!size || !cellSpacing || !state.path || state.path.length === 0) return;
-
-      const level = LEVELS[state.currentLevelIndex];
-      ctx.clearRect(0, 0, size, size);
-
-      // 0. Semi-transparent African Savanna Backdrop
-      drawSavannaBackdrop(size, padding, cellSpacing, gridSize);
-
-      // 1. Subtle Grid Lines
-      ctx.strokeStyle = 'rgba(251, 191, 36, 0.22)';
-      ctx.lineWidth = 1;
-      for (let i = 0; i < gridSize; i++) {
-        const pos = padding + i * cellSpacing;
-        ctx.beginPath();
-        ctx.moveTo(pos, padding);
-        ctx.lineTo(pos, padding + cellSpacing * (gridSize - 1));
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(padding, pos);
-        ctx.lineTo(padding + cellSpacing * (gridSize - 1), pos);
-        ctx.stroke();
-      }
-
-      // 2. Draw Impassable Rocks & Lakes
-      drawObstacles(level.obstacles, cellSpacing);
-
-      // 3. Draw Completed Path Segments
-      const playerMapForColor = state.revealLengths ? computePathTerms(state.path) : null;
-      const isRevealedMatch = state.revealLengths && areRadicalMapsEqual(playerMapForColor, level.targetMap);
-
-      for (let i = 0; i < state.path.length - 1; i++) {
-        const p1 = gridToPixel(state.path[i].x, state.path[i].y);
-        const p2 = gridToPixel(state.path[i + 1].x, state.path[i + 1].y);
-
-        const segGlowColor = !state.revealLengths
-          ? 'rgba(251, 191, 36, 0.35)'
-          : isRevealedMatch
-            ? 'rgba(52, 211, 153, 0.38)'
-            : 'rgba(251, 113, 133, 0.38)';
-        const segStrokeColor = !state.revealLengths
-          ? '#fbbf24'
-          : isRevealedMatch
-            ? '#34d399'
-            : '#fb7185';
-
-        ctx.save();
-        ctx.strokeStyle = segGlowColor;
-        ctx.lineWidth = 9;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(p1.px, p1.py);
-        ctx.lineTo(p2.px, p2.py);
-        ctx.stroke();
-
-        ctx.strokeStyle = segStrokeColor;
-        ctx.lineWidth = 3.5;
-        ctx.beginPath();
-        ctx.moveTo(p1.px, p1.py);
-        ctx.lineTo(p2.px, p2.py);
-        ctx.stroke();
-        ctx.restore();
-
-        if (state.revealLengths) {
-          const dx = state.path[i + 1].x - state.path[i].x;
-          const dy = state.path[i + 1].y - state.path[i].y;
-          const term = simplifyRadical(dx * dx + dy * dy);
-          const label = formatSingleTerm(term.coeff, term.rad);
-
-          // Offset label slightly perpendicular to the segment so it sits cleanly beside the drawn line
-          const midX = (p1.px + p2.px) / 2;
-          const midY = (p1.py + p2.py) / 2;
-          const segLen = Math.hypot(p2.px - p1.px, p2.py - p1.py) || 1;
-          const nx = -(p2.py - p1.py) / segLen;
-          const ny = (p2.px - p1.px) / segLen;
-          const offsetDist = 16;
-          const labelX = Math.max(26, Math.min(size - 26, midX + nx * offsetDist));
-          const labelY = Math.max(16, Math.min(size - 16, midY + ny * offsetDist));
-
+          if (p.y > cCanvas.height + 20) {
+            p.y = -20;
+            p.x = Math.random() * cCanvas.width;
+          }
           ctx.save();
-          ctx.font = '800 12px "JetBrains Mono", monospace';
-          const textWidth = ctx.measureText(label).width;
-          const boxW = textWidth + 14;
-          const boxH = 22;
-
-          ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
-          ctx.strokeStyle = isRevealedMatch ? '#34d399' : '#fb7185';
-          ctx.lineWidth = 1.6;
-          ctx.beginPath();
-          ctx.roundRect(labelX - boxW / 2, labelY - boxH / 2, boxW, boxH, 7);
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.fillStyle = isRevealedMatch ? '#a7f3d0' : '#fecdd3';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(label, labelX, labelY + 0.5);
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
           ctx.restore();
         }
+        confettiAnimId = requestAnimationFrame(frame);
       }
-
-      // 4. Draw Preview Line
-      const head = state.path[state.path.length - 1];
-      const headPx = gridToPixel(head.x, head.y);
-      if (!state.isWon && (state.isDragging || state.hoverNode)) {
-        const targetPx = state.hoverNode
-          ? gridToPixel(state.hoverNode.x, state.hoverNode.y)
-          : state.pointerPos;
-
-        if (targetPx) {
-          const isBlocked = state.hoverNode
-            ? segmentHitsObstacle(head.x, head.y, state.hoverNode.x, state.hoverNode.y, level.obstacles)
-            : false;
-
-          ctx.save();
-          ctx.setLineDash([6, 6]);
-          ctx.strokeStyle = isBlocked ? 'rgba(248, 113, 113, 0.9)' : 'rgba(253, 224, 71, 0.78)';
-          ctx.lineWidth = 2.5;
-          ctx.beginPath();
-          ctx.moveTo(headPx.px, headPx.py);
-          ctx.lineTo(targetPx.px, targetPx.py);
-          ctx.stroke();
-          ctx.restore();
-        }
-      }
-
-      // 5. Draw Lattice Nodes (Skipping Obstacle Nodes)
-      const obsSet = new Set((level.obstacles || []).map(o => `${o.x},${o.y}`));
-      const baseDotRadius = gridSize >= 8 ? 4.2 : gridSize === 7 ? 4.8 : 5.2;
-
-      for (let gx = 0; gx < gridSize; gx++) {
-        for (let gy = 0; gy < gridSize; gy++) {
-          if (obsSet.has(`${gx},${gy}`)) continue;
-
-          const { px, py } = gridToPixel(gx, gy);
-          const isStart = gx === level.start.x && gy === level.start.y;
-          const isEnd = gx === level.end.x && gy === level.end.y;
-          const isHead = gx === head.x && gy === head.y;
-          const isInPath = state.path.some(p => p.x === gx && p.y === gy);
-          const isHover = state.hoverNode && state.hoverNode.x === gx && state.hoverNode.y === gy;
-
-          if (isHover && !state.isGameOver) {
-            const blocked = segmentHitsObstacle(head.x, head.y, gx, gy, level.obstacles);
-            ctx.beginPath();
-            ctx.arc(px, py, baseDotRadius + 10, 0, Math.PI * 2);
-            ctx.fillStyle = blocked ? 'rgba(248, 113, 113, 0.28)' : 'rgba(251, 191, 36, 0.25)';
-            ctx.fill();
-          }
-
-          if (isHead && !state.isGameOver) {
-            ctx.beginPath();
-            ctx.arc(px, py, baseDotRadius + 11, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(251, 191, 36, 0.65)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-          }
-
-          if (isStart && !isHead) {
-            ctx.beginPath();
-            ctx.arc(px, py, baseDotRadius + 5, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(245, 158, 11, 0.28)';
-            ctx.fill();
-            ctx.strokeStyle = '#fbbf24';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-          }
-
-          if (isEnd && !isHead) {
-            ctx.beginPath();
-            ctx.arc(px, py, baseDotRadius + 13, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(16, 185, 129, 0.25)';
-            ctx.fill();
-            ctx.strokeStyle = '#34d399';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            if (CUSTOM_SPRITES.palm.ready && CUSTOM_SPRITES.palm.img) {
-              const iconSize = gridSize >= 8 ? 42 : 48;
-              ctx.drawImage(CUSTOM_SPRITES.palm.img, px - iconSize / 2, py - iconSize / 2, iconSize, iconSize);
-            } else {
-              ctx.font = `${gridSize >= 8 ? 28 : 34}px sans-serif`;
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.fillText('🌴', px, py + 1);
-            }
-            continue;
-          }
-
-          if (isHead) {
-            ctx.beginPath();
-            ctx.arc(px, py, baseDotRadius + 14, 0, Math.PI * 2);
-            ctx.fillStyle = isEnd ? 'rgba(52, 211, 153, 0.35)' : 'rgba(251, 191, 36, 0.34)';
-            ctx.fill();
-            ctx.strokeStyle = isEnd ? '#34d399' : '#fbbf24';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            if (CUSTOM_SPRITES.lion.ready && CUSTOM_SPRITES.lion.img) {
-              const iconSize = gridSize >= 8 ? 44 : 52;
-              ctx.drawImage(CUSTOM_SPRITES.lion.img, px - iconSize / 2, py - iconSize / 2, iconSize, iconSize);
-            } else {
-              ctx.font = `${gridSize >= 8 ? 30 : 36}px sans-serif`;
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.fillText('🦁', px, py + 1);
-            }
-            continue;
-          }
-
-          ctx.beginPath();
-          ctx.arc(px, py, isInPath ? baseDotRadius + 1.5 : baseDotRadius, 0, Math.PI * 2);
-          ctx.fillStyle = isInPath ? '#fbbf24' : '#fef3c7';
-          ctx.fill();
-
-          ctx.lineWidth = 1.5;
-          ctx.strokeStyle = isInPath ? '#b45309' : 'rgba(120, 53, 15, 0.7)';
-          ctx.stroke();
-        }
-      }
+      cancelAnimationFrame(confettiAnimId);
+      frame();
     }
 
-    // ==========================================
-    // 10. EVENT LISTENERS & BOOTSTRAP
-      // 6. Pointer & UI Event Listeners
+    function openCoronationScreen() {
+      const overlay = document.getElementById('coronation-overlay');
+      const imgEl = document.getElementById('coronation-img');
+      const fallbackEl = document.getElementById('coronation-fallback');
+
+      const candidates = ['image/coronation.png', 'image/coronation.jpg'];
+      let idx = 0;
+      const tryLoad = () => {
+        if (idx >= candidates.length) return;
+        const probe = new Image();
+        probe.onload = () => {
+          imgEl.src = candidates[idx];
+          imgEl.classList.remove('hidden');
+          fallbackEl.classList.add('hidden');
+        };
+        probe.onerror = () => {
+          idx++;
+          tryLoad();
+        };
+        probe.src = candidates[idx];
+      };
+      tryLoad();
+
+      overlay.classList.remove('hidden');
+      startConfettiCelebration();
+    }
+
+    document.getElementById('coronation-back-board-btn').addEventListener('click', () => {
+      cancelAnimationFrame(confettiAnimId);
+      document.getElementById('coronation-overlay').classList.add('hidden');
+    });
+
+    document.getElementById('coronation-home-btn').addEventListener('click', () => {
+      cancelAnimationFrame(confettiAnimId);
+      goBackHome();
+    });
+
+    // =========================================================================
+    // 7. RESPONSIVE CANVAS RENDERER & MOBILE TOUCH DRAG-TO-MOVE CONTROLS
+    // =========================================================================
+    const canvas = document.getElementById('board-canvas');
+    const ctx = canvas.getContext('2d');
+    let boardMetrics = { size: 400, padding: 44, cellSpan: 100 };
+
+    function resizeCanvas() {
+      const wrapper = document.getElementById('canvas-wrapper');
+      const rect = wrapper.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const cssSize = Math.max(260, Math.floor(rect.width));
+
+      canvas.width = cssSize * dpr;
+      canvas.height = cssSize * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const cfg = getLevelConfig(currentLevelNum);
+      const padding = Math.max(34, Math.round(cssSize * 0.11));
+      const cellSpan = (cssSize - padding * 2) / (cfg.gridSize - 1);
+      boardMetrics = { size: cssSize, padding, cellSpan };
+
+      drawBoard();
+    }
+
+    function gridToCanvas(pt) {
+      return {
+        cx: boardMetrics.padding + pt.x * boardMetrics.cellSpan,
+        cy: boardMetrics.padding + pt.y * boardMetrics.cellSpan
+      };
+    }
+
+    // Large 58% magnetic touch hotspot for effortless mobile tapping & dragging
+    function findNearestGridNode(clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      const px = clientX - rect.left;
+      const py = clientY - rect.top;
+      const cfg = getLevelConfig(currentLevelNum);
+      const snapRadius = boardMetrics.cellSpan * 0.58;
+
+      let bestNode = null;
+      let bestDist = Infinity;
+
+      for (let x = 0; x < cfg.gridSize; x++) {
+        for (let y = 0; y < cfg.gridSize; y++) {
+          const { cx, cy } = gridToCanvas({ x, y });
+          const d = Math.hypot(px - cx, py - cy);
+          if (d <= snapRadius && d < bestDist) {
+            bestDist = d;
+            bestNode = { x, y };
+          }
+        }
+      }
+      return { node: bestNode, px, py };
+    }
+
+    function isNodeBlocked(pt, cfg) {
+      return cfg.obstacles.some(o => o.x === pt.x && o.y === pt.y);
+    }
+
+    function canMoveToNode(targetNode) {
+      if (!targetNode || isLevelCleared) return false;
+      const cfg = getLevelConfig(currentLevelNum);
+      const curr = playerPath[playerPath.length - 1];
+      if (curr.x === targetNode.x && curr.y === targetNode.y) return false;
+      if (playerPath.length - 1 >= cfg.maxSteps) return false;
+
+      // Prevent revisiting already-visited vertices in the current path
+      if (playerPath.some(p => p.x === targetNode.x && p.y === targetNode.y)) return false;
+
+      const blockedSet = new Set(cfg.obstacles.map(pointKey));
+      if (segmentHitsObstacle(curr, targetNode, blockedSet)) return false;
+
+      return true;
+    }
+
+    function attemptStepTo(targetNode) {
+      if (!targetNode || isLevelCleared) return false;
+
+      // Dragging backwards onto the previous node smoothly undoes 1 step
+      if (playerPath.length >= 2) {
+        const prevNode = playerPath[playerPath.length - 2];
+        if (prevNode.x === targetNode.x && prevNode.y === targetNode.y) {
+          playerPath.pop();
+          playTone(330, 0.08, 'sine', 0.06);
+          updateMoveStats();
+          drawBoard();
+          return true;
+        }
+      }
+
+      if (!canMoveToNode(targetNode)) return false;
+
+      playerPath.push({ x: targetNode.x, y: targetNode.y });
+      playTone(440 + playerPath.length * 55, 0.09, 'sine', 0.08);
+      updateMoveStats();
+      drawBoard();
+      return true;
+    }
+
+    // Unified Pointer Events (Mouse + Touch Drag-to-Move)
     canvas.addEventListener('pointerdown', (e) => {
-      initAudio();
-      if (state.isWon) return;
-      const pos = getPointerCanvasCoords(e);
-      state.pointerPos = pos;
-      const node = pixelToNearestNode(pos.px, pos.py);
-      const head = state.path[state.path.length - 1];
+      if (isLevelCleared) return;
+      canvas.setPointerCapture(e.pointerId);
+      isPointerDragging = true;
+      const { node, px, py } = findNearestGridNode(e.clientX, e.clientY);
+      pointerPos = { px, py };
+      hoveredNode = node;
 
-      if (node && node.x === head.x && node.y === head.y) {
-        state.isDragging = true;
-        canvas.setPointerCapture(e.pointerId);
-      } else if (node) {
-        tryAddNode(node);
-        state.isDragging = true;
-        canvas.setPointerCapture(e.pointerId);
+      if (node) {
+        const curr = playerPath[playerPath.length - 1];
+        // If user tapped directly on a valid next node (not current lion position), step immediately
+        if (curr.x !== node.x || curr.y !== node.y) {
+          attemptStepTo(node);
+        }
       }
-      render();
+      drawBoard();
     });
 
     canvas.addEventListener('pointermove', (e) => {
-      const pos = getPointerCanvasCoords(e);
-      state.pointerPos = pos;
-      state.hoverNode = pixelToNearestNode(pos.px, pos.py);
+      if (!isPointerDragging || isLevelCleared) return;
+      const { node, px, py } = findNearestGridNode(e.clientX, e.clientY);
+      pointerPos = { px, py };
+      hoveredNode = node;
 
-      if (state.isDragging && state.hoverNode && !state.isWon) {
-        const head = state.path[state.path.length - 1];
-        if (state.hoverNode.x !== head.x || state.hoverNode.y !== head.y) {
-          tryAddNode(state.hoverNode);
+      if (node) {
+        attemptStepTo(node);
+      }
+      drawBoard();
+    });
+
+    function endPointerDrag(e) {
+      if (!isPointerDragging) return;
+      isPointerDragging = false;
+      hoveredNode = null;
+      pointerPos = null;
+      try {
+        canvas.releasePointerCapture(e.pointerId);
+      } catch (err) {}
+      drawBoard();
+    }
+
+    canvas.addEventListener('pointerup', endPointerDrag);
+    canvas.addEventListener('pointercancel', endPointerDrag);
+
+    // =========================================================================
+    // 8. SAVANNA GEOMETRY BOARD DRAWING
+    // =========================================================================
+    function drawSegmentLabel(p1, p2, labelText, bgColor = 'rgba(15, 23, 42, 0.92)', textColor = '#fde68a') {
+      const a = gridToCanvas(p1);
+      const b = gridToCanvas(p2);
+      const mx = (a.cx + b.cx) / 2;
+      const my = (a.cy + b.cy) / 2;
+
+      ctx.save();
+      ctx.font = 'bold 12px Inter, "Noto Sans TC", sans-serif';
+      const metrics = ctx.measureText(labelText);
+      const padX = 7;
+      const boxW = metrics.width + padX * 2;
+      const boxH = 20;
+
+      ctx.fillStyle = bgColor;
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.55)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(mx - boxW / 2, my - boxH / 2, boxW, boxH, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = textColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(labelText, mx, my + 0.5);
+      ctx.restore();
+    }
+
+    function drawBoard() {
+      const cfg = getLevelConfig(currentLevelNum);
+      const { size, padding, cellSpan } = boardMetrics;
+      const maxCoord = padding + (cfg.gridSize - 1) * cellSpan;
+
+      ctx.clearRect(0, 0, size, size);
+
+      // 1. Savanna Sunset Parchment Background
+      const bgGrad = ctx.createLinearGradient(0, 0, size, size);
+      bgGrad.addColorStop(0, '#1e1b18');
+      bgGrad.addColorStop(0.5, '#292118');
+      bgGrad.addColorStop(1, '#141923');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, size, size);
+
+      // Subtle warm sun glow in top-right corner
+      const sunGrad = ctx.createRadialGradient(size * 0.82, size * 0.18, 6, size * 0.82, size * 0.18, size * 0.55);
+      sunGrad.addColorStop(0, 'rgba(245, 158, 11, 0.22)');
+      sunGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
+      ctx.fillStyle = sunGrad;
+      ctx.fillRect(0, 0, size, size);
+
+      // 2. Grid Lines
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.16)';
+      ctx.lineWidth = 1.2;
+      for (let i = 0; i < cfg.gridSize; i++) {
+        const pos = padding + i * cellSpan;
+        ctx.beginPath();
+        ctx.moveTo(padding, pos);
+        ctx.lineTo(maxCoord, pos);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(pos, padding);
+        ctx.lineTo(pos, maxCoord);
+        ctx.stroke();
+      }
+
+      // 3. Optional Master Hint Dashed Path
+      if (showHintPath && !isLevelCleared) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(52, 211, 153, 0.55)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([7, 6]);
+        ctx.beginPath();
+        cfg.solutionPath.forEach((pt, idx) => {
+          const { cx, cy } = gridToCanvas(pt);
+          if (idx === 0) ctx.moveTo(cx, cy);
+          else ctx.lineTo(cx, cy);
+        });
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 4. Live Touch Drag Rubber-Band Preview Line
+      if (isPointerDragging && pointerPos && !isLevelCleared) {
+        const currCanvas = gridToCanvas(playerPath[playerPath.length - 1]);
+        const targetCanvas = hoveredNode ? gridToCanvas(hoveredNode) : { cx: pointerPos.px, cy: pointerPos.py };
+        const validHover = hoveredNode && canMoveToNode(hoveredNode);
+
+        ctx.save();
+        ctx.strokeStyle = validHover ? 'rgba(251, 191, 36, 0.85)' : 'rgba(148, 163, 184, 0.45)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        ctx.moveTo(currCanvas.cx, currCanvas.cy);
+        ctx.lineTo(targetCanvas.cx, targetCanvas.cy);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 5. Player Active Path Segments
+      if (playerPath.length > 1) {
+        ctx.save();
+        ctx.strokeStyle = isLevelCleared ? '#34d399' : '#fbbf24';
+        ctx.lineWidth = 4.5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.shadowColor = isLevelCleared ? 'rgba(52, 211, 153, 0.5)' : 'rgba(245, 158, 11, 0.5)';
+        ctx.shadowBlur = 10;
+
+        ctx.beginPath();
+        playerPath.forEach((pt, idx) => {
+          const { cx, cy } = gridToCanvas(pt);
+          if (idx === 0) ctx.moveTo(cx, cy);
+          else ctx.lineTo(cx, cy);
+        });
+        ctx.stroke();
+        ctx.restore();
+
+        // Segment radical distance badges
+        for (let i = 0; i < playerPath.length - 1; i++) {
+          const rad = segmentRadical(playerPath[i], playerPath[i + 1]);
+          const text = formatRadicalMap({ [rad.m]: rad.k });
+          drawSegmentLabel(
+            playerPath[i],
+            playerPath[i + 1],
+            text,
+            isLevelCleared ? 'rgba(6, 78, 59, 0.94)' : 'rgba(15, 23, 42, 0.92)',
+            isLevelCleared ? '#6ee7b7' : '#fde68a'
+          );
         }
       }
-      render();
-    });
 
-    canvas.addEventListener('pointerup', (e) => {
-      state.isDragging = false;
-      state.pointerPos = null;
-      if (canvas.hasPointerCapture(e.pointerId)) {
-        canvas.releasePointerCapture(e.pointerId);
+      // 6. Grid Intersections & Magnetic Touch Crosshair Ring
+      for (let x = 0; x < cfg.gridSize; x++) {
+        for (let y = 0; y < cfg.gridSize; y++) {
+          const pt = { x, y };
+          if (isNodeBlocked(pt, cfg)) continue;
+          const { cx, cy } = gridToCanvas(pt);
+          const isVisited = playerPath.some(p => p.x === x && p.y === y);
+          const isValidCandidate = canMoveToNode(pt);
+
+          // Subtle reachable indicator dot
+          ctx.beginPath();
+          ctx.arc(cx, cy, isVisited ? 6 : (isValidCandidate ? 5 : 3.5), 0, Math.PI * 2);
+          ctx.fillStyle = isVisited ? '#fbbf24' : (isValidCandidate ? 'rgba(251, 191, 36, 0.65)' : 'rgba(148, 163, 184, 0.45)');
+          ctx.fill();
+
+          // Magnetic Crosshair Halo when finger snaps near a valid node
+          if (hoveredNode && hoveredNode.x === x && hoveredNode.y === y && isValidCandidate) {
+            ctx.save();
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([4, 3]);
+            ctx.beginPath();
+            ctx.arc(cx, cy, 18, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
       }
-      render();
-    });
 
-    canvas.addEventListener('pointerleave', () => {
-      if (!state.isDragging) {
-        state.hoverNode = null;
-        state.pointerPos = null;
-        render();
+      // 7. Obstacles (Rocks & Lakes)
+      for (const obs of cfg.obstacles) {
+        const { cx, cy } = gridToCanvas(obs);
+        const sprite = obs.type === 'lake' ? SPRITES.lake : SPRITES.rock;
+        if (sprite) {
+          const iconSize = Math.min(38, cellSpan * 0.56);
+          ctx.drawImage(sprite, cx - iconSize / 2, cy - iconSize / 2, iconSize, iconSize);
+        } else {
+          ctx.font = `${Math.min(26, Math.round(cellSpan * 0.42))}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(obs.type === 'lake' ? '💧' : '🪨', cx, cy);
+        }
       }
-    });
 
-    undoBtn.addEventListener('click', () => {
-      initAudio();
-      undoStep();
-    });
+      // 8. Oasis Coconut Tree Goal
+      const goalPos = gridToCanvas(cfg.goal);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(goalPos.cx, goalPos.cy, 19, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.22)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(52, 211, 153, 0.7)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
 
-    resetBtn.addEventListener('click', () => {
-      initAudio();
-      loadLevel(state.currentLevelIndex);
-    });
-
-    document.getElementById('prev-level-btn').addEventListener('click', () => {
-      initAudio();
-      if (state.currentLevelIndex > 0) loadLevel(state.currentLevelIndex - 1);
-    });
-
-    document.getElementById('next-level-btn').addEventListener('click', () => {
-      initAudio();
-      if (state.currentLevelIndex < LEVELS.length - 1) loadLevel(state.currentLevelIndex + 1);
-    });
-
-    document.getElementById('sound-toggle-btn').addEventListener('click', (e) => {
-      soundEnabled = !soundEnabled;
-      e.currentTarget.textContent = soundEnabled ? '🔊' : '🔇';
-      if (soundEnabled) initAudio();
-    });
-
-    const hintModal = document.getElementById('hint-modal');
-    document.getElementById('hint-toggle-btn').addEventListener('click', () => {
-      hintModal.classList.remove('hidden');
-      hintModal.classList.add('flex');
-    });
-    document.getElementById('close-hint-btn').addEventListener('click', () => {
-      hintModal.classList.add('hidden');
-      hintModal.classList.remove('flex');
-    });
-    hintModal.addEventListener('click', (e) => {
-      if (e.target === hintModal) {
-        hintModal.classList.add('hidden');
-        hintModal.classList.remove('flex');
-      }
-    });
-
-    document.getElementById('inline-next-btn').addEventListener('click', () => {
-      initAudio();
-      if (state.currentLevelIndex < LEVELS.length - 1) {
-        loadLevel(state.currentLevelIndex + 1);
+      if (SPRITES.palm) {
+        const iconSize = Math.min(42, cellSpan * 0.62);
+        ctx.drawImage(SPRITES.palm, goalPos.cx - iconSize / 2, goalPos.cy - iconSize / 2, iconSize, iconSize);
       } else {
-        openCoronationCeremony();
+        ctx.font = `${Math.min(28, Math.round(cellSpan * 0.46))}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🌴', goalPos.cx, goalPos.cy);
       }
-    });
 
-    // Grand Finale Full-Screen Coronation Ceremony Controls
-    const coronationOverlay = document.getElementById('coronation-overlay');
-    let coronationHudHidden = false;
+      // 9. Young Lion Explorer (Current Position)
+      const lionPt = playerPath[playerPath.length - 1];
+      const lionPos = gridToCanvas(lionPt);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(lionPos.cx, lionPos.cy, 20, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.28)';
+      ctx.fill();
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+      ctx.restore();
 
-    function openCoronationCeremony() {
-      playTone('win');
-      startConfetti();
-      const statsEl = document.getElementById('coronation-stats-text');
-      if (statsEl) {
-        statsEl.textContent = `已制霸 ${state.completedLevels.size} / ${LEVELS.length} 關 · 獅子王加冕`;
+      if (SPRITES.lion) {
+        const iconSize = Math.min(44, cellSpan * 0.66);
+        ctx.drawImage(SPRITES.lion, lionPos.cx - iconSize / 2, lionPos.cy - iconSize / 2, iconSize, iconSize);
+      } else {
+        ctx.font = `${Math.min(30, Math.round(cellSpan * 0.48))}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🦁', lionPos.cx, lionPos.cy);
       }
-      coronationHudHidden = false;
-      document.getElementById('coronation-bottom-bar').classList.remove('opacity-0', 'pointer-events-none');
-      document.getElementById('coronation-vignette').classList.remove('opacity-0');
-      document.getElementById('coronation-toggle-hud-btn').textContent = '🖼️ 純賞圖模式';
-      coronationOverlay.classList.remove('hidden');
-      coronationOverlay.classList.add('flex');
     }
 
-    document.getElementById('coronation-toggle-hud-btn').addEventListener('click', () => {
-      coronationHudHidden = !coronationHudHidden;
-      const bottomBar = document.getElementById('coronation-bottom-bar');
-      const vignette = document.getElementById('coronation-vignette');
-      const toggleBtn = document.getElementById('coronation-toggle-hud-btn');
-      if (coronationHudHidden) {
-        bottomBar.classList.add('opacity-0', 'pointer-events-none');
-        vignette.classList.add('opacity-0');
-        toggleBtn.textContent = '📜 顯示控制按鈕';
-      } else {
-        bottomBar.classList.remove('opacity-0', 'pointer-events-none');
-        vignette.classList.remove('opacity-0');
-        toggleBtn.textContent = '🖼️ 純賞圖模式';
+    // =========================================================================
+    // 9. BUTTON LISTENERS & INITIAL BOOTSTRAP
+    // =========================================================================
+    function goBackHome() {
+      try {
+        sessionStorage.removeItem('savanna_entered_from_home');
+      } catch (e) {}
+      window.location.assign(`${HOME_PAGE_URL}?t=${Date.now()}`);
+    }
+
+    document.getElementById('home-btn').addEventListener('click', goBackHome);
+
+    document.getElementById('undo-btn').addEventListener('click', () => {
+      if (playerPath.length > 1 && !isLevelCleared) {
+        playerPath.pop();
+        playTone(330, 0.08, 'sine', 0.06);
+        updateMoveStats();
+        drawBoard();
       }
     });
 
-    document.getElementById('coronation-close-btn').addEventListener('click', () => {
-      coronationOverlay.classList.add('hidden');
-      coronationOverlay.classList.remove('flex');
+    document.getElementById('reset-level-btn').addEventListener('click', () => {
+      loadLevel(currentLevelNum);
+      playTone(392, 0.08, 'sine', 0.06);
     });
 
-    document.getElementById('coronation-replay-btn').addEventListener('click', () => {
-      coronationOverlay.classList.add('hidden');
-      coronationOverlay.classList.remove('flex');
-      loadLevel(0);
+    document.getElementById('hint-btn').addEventListener('click', () => {
+      showHintPath = !showHintPath;
+      playTone(587.33, 0.09, 'sine', 0.06);
+      drawBoard();
     });
 
-    let resizeRafId = null;
-    const resizeObserver = new ResizeObserver(() => {
-      if (resizeRafId) cancelAnimationFrame(resizeRafId);
-      resizeRafId = requestAnimationFrame(() => {
-        resizeCanvas();
-        resizeRafId = null;
-      });
-    });
-    resizeObserver.observe(canvasWrapper);
-    window.addEventListener('resize', () => {
-      if (resizeRafId) cancelAnimationFrame(resizeRafId);
-      resizeRafId = requestAnimationFrame(() => {
-        resizeCanvas();
-        resizeRafId = null;
-      });
+    window.addEventListener('resize', resizeCanvas);
+
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) {
+        saveState = readSaveData();
+        renderLevelStrip();
+      }
     });
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => loadLevel(0));
-    } else {
-      loadLevel(0);
-    }
+    window.onload = function() {
+      const params = new URLSearchParams(window.location.search);
+      const requestedLv = parseInt(params.get('level'), 10);
+      const initialLv = !isNaN(requestedLv)
+        ? Math.min(TOTAL_LEVELS, Math.max(1, requestedLv))
+        : saveState.currentLevel;
+
+      loadLevel(initialLv);
+      resizeCanvas();
+    };
   </script>
 </body>
 </html>
