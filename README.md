@@ -17,3 +17,4 @@
 路線限制：不可經過巨石（🪨）與湖泊（💧），且同一關不可重複踩點。
 
 宗師提示：卡關時可開啟提示顯示「第一步落點」，使用提示通關最高獲得 1 星（重走本關可無提示衝刺三星）。
+<img width="400" height="400" alt="Afar-Triangle  QRCODE" src="https://github.com/user-attachments/assets/c98eb0fa-455e-4bde-a424-0c41339eea18" />
