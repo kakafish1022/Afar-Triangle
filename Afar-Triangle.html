@@ -218,7 +218,6 @@
     const HOME_PAGE_URL = 'index.html';
     const TOTAL_LEVELS = 50;
 
-    // Enforce entry from home page on cold reopen so mobile session restore never traps user
     // Enforce entry from home page on cold reopen / incognito pasted link
     (function enforceHomeEntry() {
       try {
@@ -291,8 +290,6 @@
     // =========================================================================
     // 2. EXACT RADICAL ARITHMETIC ENGINE (Pythagorean Segment Simplifier)
     // =========================================================================
-    // Expresses any Euclidean segment length sqrt(dx^2 + dy^2) = k * sqrt(m)
-    // where m is square-free, and sums segments into canonical map { m: k }.
     function simplifyRadical(n) {
       if (n === 0) return { k: 0, m: 1 };
       let k = 1;
@@ -363,7 +360,6 @@
       return `${p.x},${p.y}`;
     }
 
-    // Check whether segment AB passes directly through any blocked grid vertex
     function segmentHitsObstacle(a, b, blockedSet) {
       const dx = b.x - a.x;
       const dy = b.y - a.y;
@@ -388,14 +384,13 @@
     }
 
     // Generate all 50 levels deterministically on a mobile-friendly 4x4 grid
-    // Difficulty scales via winding multi-step detours (2 to 6 steps) & obstacles
     const LEVELS = [];
 
     (function buildAllLevels() {
       for (let lv = 1; lv <= TOTAL_LEVELS; lv++) {
         const rng = createSeededRng(2026000 + lv * 7919);
 
-        // Keep comfortable 4x4 grid across all 50 levels for crisp mobile & desktop touch
+        // Keep comfortable 4x4 grid across all 50 levels for crisp mobile touch
         const gridSize = 4;
 
         // Optimal steps scale from 2 up to 6 for rich detour puzzles on 4x4
@@ -426,10 +421,8 @@
                 const kStr = `${nx},${ny}`;
                 if (usedNodes.has(kStr)) continue;
                 const distSq = (nx - curr.x) ** 2 + (ny - curr.y) ** 2;
-                // Keep step lengths visually clean & varied
                 if (distSq === 0 || distSq > 18) continue;
                 const rad = simplifyRadical(distSq);
-                // Prefer varied radical types on higher levels
                 const weight = usedRadicals.has(rad.m) ? 1 : 4;
                 for (let w = 0; w < weight; w++) {
                   candidates.push({ x: nx, y: ny, m: rad.m });
@@ -447,12 +440,10 @@
           if (path.length !== optimalSteps + 1) continue;
 
           const goal = path[path.length - 1];
-          // Ensure direct straight jump from start to goal doesn't accidentally equal the multi-step sum
           const directTerms = computePathRadicalMap([start, goal]);
           const targetTerms = computePathRadicalMap(path);
           if (areRadicalMapsEqual(directTerms, targetTerms)) continue;
 
-          // Place Savanna Obstacles (Rocks & Lakes) on unused nodes (up to 4)
           const maxObstacles = Math.min(
             4,
             Math.floor((lv - 1) / 8) + 1
@@ -469,7 +460,6 @@
             }
           }
 
-          // Shuffle free cells
           for (let i = freeCells.length - 1; i > 0; i--) {
             const j = Math.floor(rng() * (i + 1));
             [freeCells[i], freeCells[j]] = [freeCells[j], freeCells[i]];
@@ -480,7 +470,6 @@
             const testBlocked = new Set(blockedSet);
             testBlocked.add(pointKey(cell));
 
-            // Verify none of the golden solution segments pass through this obstacle
             let blocksSolution = false;
             for (let i = 0; i < path.length - 1; i++) {
               if (segmentHitsObstacle(path[i], path[i + 1], testBlocked)) {
@@ -513,7 +502,6 @@
           };
         }
 
-        // Ultra-safe deterministic fallback if random search ever missed
         if (!built) {
           const path = [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }];
           const targetTerms = computePathRadicalMap(path);
@@ -536,7 +524,7 @@
     })();
 
     // =========================================================================
-    // 4. GAME STATE & SOUND FEEDBACK (Web Audio Synthesizer - Zero External URLs)
+    // 4. GAME STATE & SOUND FEEDBACK
     // =========================================================================
     let saveState = readSaveData();
     let currentLevelNum = 1;
@@ -544,7 +532,6 @@
     let isLevelCleared = false;
     let showHintPath = false;
 
-    // Touch / Pointer Drag-to-Move State
     let isPointerDragging = false;
     let hoveredNode = null;
     let pointerPos = null;
@@ -625,7 +612,6 @@
         strip.appendChild(btn);
       }
 
-      // Scroll active level pill smoothly into view
       const activePill = strip.querySelector(`[data-level="${currentLevelNum}"]`);
       if (activePill) {
         activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
@@ -651,8 +637,8 @@
       const msgEl = document.getElementById('status-message');
       const actions = document.getElementById('banner-action-group');
 
-      banner.className = 'w-full rounded-2xl bg-slate-900/75 border border-slate-700/70 px-3.5 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm';
-      msgEl.className = 'text-slate-200 font-medium text-center sm:text-left leading-relaxed';
+      banner.className = 'w-full rounded-2xl bg-slate-900/75 border border-slate-700/70 px-3 py-1.5 sm:px-3.5 sm:py-2 flex flex-col sm:flex-row items-center justify-between gap-1.5 text-[11px] sm:text-sm shrink-0';
+      msgEl.className = 'text-slate-200 font-medium text-center sm:text-left leading-snug';
       msgEl.textContent = `引導小獅抵達椰子樹並吻合密碼；若小獅子以 ${cfg.optimalSteps} 步內完成可奪得三星宗師！`;
       actions.classList.add('hidden');
     }
@@ -661,7 +647,6 @@
       currentLevelNum = Math.min(TOTAL_LEVELS, Math.max(1, lvNum));
       const cfg = getLevelConfig(currentLevelNum);
 
-      // Persist current level pointer
       saveState.currentLevel = currentLevelNum;
       writeSaveData(saveState);
 
@@ -718,8 +703,8 @@
       const msgEl = document.getElementById('status-message');
       const actions = document.getElementById('banner-action-group');
 
-      banner.className = 'w-full rounded-2xl bg-rose-950/75 border border-rose-500/50 px-3.5 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm';
-      msgEl.className = 'text-rose-200 font-bold text-center sm:text-left leading-relaxed';
+      banner.className = 'w-full rounded-2xl bg-rose-950/75 border border-rose-500/50 px-3 py-1.5 sm:px-3.5 sm:py-2 flex flex-col sm:flex-row items-center justify-between gap-1.5 text-[11px] sm:text-sm shrink-0';
+      msgEl.className = 'text-rose-200 font-bold text-center sm:text-left leading-snug';
       msgEl.textContent = `⚠️ ${text}`;
       actions.classList.add('hidden');
       playTone(220, 0.18, 'sawtooth', 0.06);
@@ -730,10 +715,6 @@
       isPointerDragging = false;
       const cfg = getLevelConfig(currentLevelNum);
 
-      // 3-Star Tiered Evaluation:
-      // 3 stars: <= optimalSteps
-      // 2 stars: == optimalSteps + 1
-      // 1 star:  <= maxSteps
       let earnedStars = 1;
       if (stepsUsed <= cfg.optimalSteps) {
         earnedStars = 3;
@@ -761,8 +742,8 @@
       const actions = document.getElementById('banner-action-group');
       const nextBtn = document.getElementById('next-action-btn');
 
-      banner.className = 'w-full rounded-2xl bg-emerald-950/80 border border-emerald-400/60 px-3.5 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm animate-pop-in';
-      msgEl.className = 'text-emerald-200 font-bold text-center sm:text-left leading-relaxed';
+      banner.className = 'w-full rounded-2xl bg-emerald-950/80 border border-emerald-400/60 px-3 py-1.5 sm:px-3.5 sm:py-2 flex flex-col sm:flex-row items-center justify-between gap-1.5 text-[11px] sm:text-sm animate-pop-in shrink-0';
+      msgEl.className = 'text-emerald-200 font-bold text-center sm:text-left leading-snug';
 
       if (earnedStars === 3) {
         msgEl.textContent = `恭喜你以完美以最簡 ${stepsUsed} 步抵達椰子樹，離通關成為獅子王更近了一步，棋盤已標示所有線段距離！`;
@@ -772,7 +753,6 @@
 
       actions.classList.remove('hidden');
 
-      // Check milestone (10, 20, 30, 40) or Level 50 Grand Coronation
       if (currentLevelNum === TOTAL_LEVELS) {
         nextBtn.textContent = '👑 登上榮耀王座（獅子王加冕儀式）';
         nextBtn.onclick = () => openCoronationScreen();
@@ -924,14 +904,14 @@
       const wrapper = document.getElementById('canvas-wrapper');
       const rect = wrapper.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const cssSize = Math.max(260, Math.floor(rect.width));
+      const cssSize = Math.max(240, Math.floor(rect.width));
 
       canvas.width = cssSize * dpr;
       canvas.height = cssSize * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       const cfg = getLevelConfig(currentLevelNum);
-      const padding = Math.max(34, Math.round(cssSize * 0.11));
+      const padding = Math.max(32, Math.round(cssSize * 0.11));
       const cellSpan = (cssSize - padding * 2) / (cfg.gridSize - 1);
       boardMetrics = { size: cssSize, padding, cellSpan };
 
@@ -945,7 +925,6 @@
       };
     }
 
-    // Large 58% magnetic touch hotspot for effortless mobile tapping & dragging
     function findNearestGridNode(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
       const px = clientX - rect.left;
@@ -980,7 +959,6 @@
       if (curr.x === targetNode.x && curr.y === targetNode.y) return false;
       if (playerPath.length - 1 >= cfg.maxSteps) return false;
 
-      // Prevent revisiting already-visited vertices in the current path
       if (playerPath.some(p => p.x === targetNode.x && p.y === targetNode.y)) return false;
 
       const blockedSet = new Set(cfg.obstacles.map(pointKey));
@@ -992,7 +970,6 @@
     function attemptStepTo(targetNode) {
       if (!targetNode || isLevelCleared) return false;
 
-      // Dragging backwards onto the previous node smoothly undoes 1 step
       if (playerPath.length >= 2) {
         const prevNode = playerPath[playerPath.length - 2];
         if (prevNode.x === targetNode.x && prevNode.y === targetNode.y) {
@@ -1013,7 +990,6 @@
       return true;
     }
 
-    // Unified Pointer Events (Mouse + Touch Drag-to-Move)
     canvas.addEventListener('pointerdown', (e) => {
       if (isLevelCleared) return;
       canvas.setPointerCapture(e.pointerId);
@@ -1024,7 +1000,6 @@
 
       if (node) {
         const curr = playerPath[playerPath.length - 1];
-        // If user tapped directly on a valid next node (not current lion position), step immediately
         if (curr.x !== node.x || curr.y !== node.y) {
           attemptStepTo(node);
         }
@@ -1096,7 +1071,6 @@
 
       ctx.clearRect(0, 0, size, size);
 
-      // 1. Savanna Sunset Parchment Background
       const bgGrad = ctx.createLinearGradient(0, 0, size, size);
       bgGrad.addColorStop(0, '#1e1b18');
       bgGrad.addColorStop(0.5, '#292118');
@@ -1104,14 +1078,12 @@
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, size, size);
 
-      // Subtle warm sun glow in top-right corner
       const sunGrad = ctx.createRadialGradient(size * 0.82, size * 0.18, 6, size * 0.82, size * 0.18, size * 0.55);
       sunGrad.addColorStop(0, 'rgba(245, 158, 11, 0.22)');
       sunGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
       ctx.fillStyle = sunGrad;
       ctx.fillRect(0, 0, size, size);
 
-      // 2. Grid Lines
       ctx.strokeStyle = 'rgba(251, 191, 36, 0.16)';
       ctx.lineWidth = 1.2;
       for (let i = 0; i < cfg.gridSize; i++) {
@@ -1127,7 +1099,6 @@
         ctx.stroke();
       }
 
-      // 3. Optional Master Hint Dashed Path
       if (showHintPath && !isLevelCleared) {
         ctx.save();
         ctx.strokeStyle = 'rgba(52, 211, 153, 0.55)';
@@ -1143,7 +1114,6 @@
         ctx.restore();
       }
 
-      // 4. Live Touch Drag Rubber-Band Preview Line
       if (isPointerDragging && pointerPos && !isLevelCleared) {
         const currCanvas = gridToCanvas(playerPath[playerPath.length - 1]);
         const targetCanvas = hoveredNode ? gridToCanvas(hoveredNode) : { cx: pointerPos.px, cy: pointerPos.py };
@@ -1160,7 +1130,6 @@
         ctx.restore();
       }
 
-      // 5. Player Active Path Segments
       if (playerPath.length > 1) {
         ctx.save();
         ctx.strokeStyle = isLevelCleared ? '#34d399' : '#fbbf24';
@@ -1179,7 +1148,6 @@
         ctx.stroke();
         ctx.restore();
 
-        // Segment radical distance badges
         for (let i = 0; i < playerPath.length - 1; i++) {
           const rad = segmentRadical(playerPath[i], playerPath[i + 1]);
           const text = formatRadicalMap({ [rad.m]: rad.k });
@@ -1193,7 +1161,6 @@
         }
       }
 
-      // 6. Grid Intersections & Magnetic Touch Crosshair Ring
       for (let x = 0; x < cfg.gridSize; x++) {
         for (let y = 0; y < cfg.gridSize; y++) {
           const pt = { x, y };
@@ -1202,13 +1169,11 @@
           const isVisited = playerPath.some(p => p.x === x && p.y === y);
           const isValidCandidate = canMoveToNode(pt);
 
-          // Subtle reachable indicator dot
           ctx.beginPath();
           ctx.arc(cx, cy, isVisited ? 6 : (isValidCandidate ? 5 : 3.5), 0, Math.PI * 2);
           ctx.fillStyle = isVisited ? '#fbbf24' : (isValidCandidate ? 'rgba(251, 191, 36, 0.65)' : 'rgba(148, 163, 184, 0.45)');
           ctx.fill();
 
-          // Magnetic Crosshair Halo when finger snaps near a valid node
           if (hoveredNode && hoveredNode.x === x && hoveredNode.y === y && isValidCandidate) {
             ctx.save();
             ctx.strokeStyle = '#fbbf24';
@@ -1222,7 +1187,6 @@
         }
       }
 
-      // 7. Obstacles (Rocks & Lakes)
       for (const obs of cfg.obstacles) {
         const { cx, cy } = gridToCanvas(obs);
         const sprite = obs.type === 'lake' ? SPRITES.lake : SPRITES.rock;
@@ -1237,7 +1201,6 @@
         }
       }
 
-      // 8. Oasis Coconut Tree Goal
       const goalPos = gridToCanvas(cfg.goal);
       ctx.save();
       ctx.beginPath();
@@ -1259,7 +1222,6 @@
         ctx.fillText('🌴', goalPos.cx, goalPos.cy);
       }
 
-      // 9. Young Lion Explorer (Current Position)
       const lionPt = playerPath[playerPath.length - 1];
       const lionPos = gridToCanvas(lionPt);
       ctx.save();
