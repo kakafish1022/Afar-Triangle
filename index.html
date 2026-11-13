@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>幾何密碼：大草原獅王之路｜貳餘</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      background-color: #090d16;
+      color: #f8fafc;
+    }
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    .animate-float-slow {
+      animation: floatSlow 3.6s ease-in-out infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 24px rgba(245, 158, 11, 0.35); }
+      50% { box-shadow: 0 0 38px rgba(245, 158, 11, 0.65); }
+    }
+    .btn-glow {
+      animation: pulseGlow 2.8s infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative overflow-x-hidden select-none">
+
+  <!-- Optional Fullscreen Cover Art Background (image/cover.png or image/cover.jpg) -->
+  <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    <img id="cover-bg-img" alt="" class="hidden w-full h-full object-cover object-center opacity-45 scale-105 transition-opacity duration-700" />
+    <!-- Default Savanna Sunset Gradient Fallback -->
+    <div id="cover-fallback-bg" class="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(245,158,11,0.22),rgba(180,83,9,0.12)_45%,rgba(9,13,22,0.96)_85%)]"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/50 to-slate-950/95"></div>
+  </div>
+
+  <!-- Top Brand Header -->
+  <header class="relative z-10 w-full max-w-4xl mx-auto px-4 pt-5 flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-950/75 border border-amber-500/35 backdrop-blur-md shadow-lg">
+      <span class="text-amber-400 text-sm">◈</span>
+      <span class="text-xs sm:text-sm font-black tracking-widest text-amber-300">貳餘 · 幾何系列</span>
+    </div>
+    <span class="text-xs font-mono text-amber-200/70 bg-slate-950/60 px-3 py-1 rounded-full border border-slate-800">
+      v2.2 · 50 關完整版
+    </span>
+  </header>
+
+  <!-- Center Hero Card -->
+  <main class="relative z-10 w-full max-w-2xl mx-auto px-4 py-6 flex flex-col items-center text-center gap-5">
+    
+    <!-- Emblem / Brand Mark -->
+    <div class="animate-float-slow relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-br from-amber-500/25 to-orange-600/20 border-2 border-amber-400/50 shadow-2xl flex items-center justify-center backdrop-blur-md overflow-hidden">
+      <img id="brand-mark-img" alt="貳餘幾何標誌" class="hidden w-full h-full object-cover" />
+      <div id="brand-mark-fallback" class="flex flex-col items-center justify-center">
+        <span class="text-4xl sm:text-5xl drop-shadow">🦁</span>
+      </div>
+    </div>
+
+    <!-- Game Title & Subtitle -->
+    <div class="space-y-2">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs font-bold tracking-wider">
+        <span>AFRICAN SAVANNA GEOMETRY</span>
+        <span>•</span>
+        <span>根式拆解冒險</span>
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-500 drop-shadow-sm">
+        幾何密碼：獅王之路
+      </h1>
+      <p class="text-slate-300 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
+        穿越非洲三角洲大草原，運用畢氏定理與最簡根式計算步距，<br class="hidden sm:inline" />
+        解開 50 道古老幾何石碑密碼，引導小獅登上榮耀王座！
+      </p>
+    </div>
+
+    <!-- Local Save Progress Card -->
+    <div class="w-full rounded-2xl bg-slate-900/80 border border-slate-700/80 backdrop-blur-md p-4 sm:p-5 shadow-xl text-left">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs sm:text-sm font-bold text-slate-200 tracking-wide">本機冒險紀錄（自動存檔）</span>
+        </div>
+        <span id="save-status-badge" class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-slate-800 text-amber-300 border border-slate-700">
+          尚未開始冒險
+        </span>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-3 gap-2.5 my-3.5 text-center">
+        <div class="rounded-xl bg-slate-950/70 border border-slate-800/90 p-2.5">
+          <div class="text-[11px] text-slate-400 mb-0.5">目前進度</div>
+          <div id="stat-current-level" class="text-base sm:text-lg font-black text-amber-300 font-mono">第 1 關</div>
+        </div>
+        <div class="rounded-xl bg-slate-950/70 border border-slate-800/90 p-2.5">
+          <div class="text-[11px] text-slate-400 mb-0.5">已通關數</div>
+          <div id="stat-cleared-count" class="text-base sm:text-lg font-black text-emerald-400 font-mono">0 / 50</div>
+        </div>
+        <div class="rounded-xl bg-slate-950/70 border border-slate-800/90 p-2.5">
+          <div class="text-[11px] text-slate-400 mb-0.5">累計榮耀星</div>
+          <div id="stat-total-stars" class="text-base sm:text-lg font-black text-yellow-400 font-mono">★ 0 / 150</div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="w-full h-2 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
+        <div id="progress-fill-bar" class="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-emerald-400 transition-all duration-500" style="width: 0%"></div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-4 flex flex-col sm:flex-row gap-2.5">
+        <button id="primary-play-btn" type="button" class="btn-glow flex-1 py-3.5 px-5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-sm sm:text-base shadow-lg transition transform active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
+          <span>🦁</span>
+          <span id="primary-play-label">開始草原冒險</span>
+        </button>
+
+        <button id="open-gallery-btn" type="button" class="py-3.5 px-4 rounded-xl bg-slate-800/95 hover:bg-slate-700 border border-amber-500/40 text-amber-200 font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md">
+          <span>🖼️</span>
+          <span>獅王圖鑑</span>
+          <span id="gallery-count-badge" class="ml-0.5 px-2 py-0.5 rounded-full text-[11px] font-mono bg-slate-950 text-amber-300 border border-amber-500/30">0/5</span>
+        </button>
+
+        <button id="start-new-btn" type="button" class="hidden py-3.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600/80 text-slate-200 font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>🌱</span>
+          <span>從第 1 關出發</span>
+        </button>
+      </div>
+
+      <!-- Reset Progress Control -->
+      <div id="reset-area" class="hidden mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs">
+        <span class="text-slate-500">進度儲存在此瀏覽器本機空間</span>
+        <button id="reset-save-btn" type="button" class="text-rose-400/80 hover:text-rose-300 underline underline-offset-2 transition cursor-pointer">
+          清除本機遊戲紀錄
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Expandable Milestone Gallery Modal (Opened via Button) -->
+  <div id="gallery-modal" class="fixed inset-0 z-40 hidden bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+    <div class="relative w-full max-w-4xl max-h-[88vh] flex flex-col rounded-3xl overflow-hidden border-2 border-amber-500/45 bg-slate-900 shadow-2xl">
+      <!-- Modal Header -->
+      <div class="px-5 py-4 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl">🖼️</span>
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-amber-300 tracking-wide">獅王成長通關照圖鑑</h2>
+            <p class="text-[11px] sm:text-xs text-slate-400">每全破一個章節（10 關）即解鎖一張專屬榮耀畫作，點擊已解鎖卡片可全屏賞圖</p>
+          </div>
+        </div>
+        <button id="close-gallery-modal-btn" type="button" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold text-xs sm:text-sm transition cursor-pointer shrink-0">
+          ✕ 關閉
+        </button>
+      </div>
+
+      <!-- Scrollable Gallery Grid (Easy to expand with more cards in the future) -->
+      <div class="p-4 sm:p-6 overflow-y-auto">
+        <div id="milestone-gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <!-- Populated dynamically by JS; locked chapters strictly hide images -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Lightbox Modal for Unlocked Milestone Photos -->
+  <div id="gallery-lightbox" class="fixed inset-0 z-50 hidden bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative w-full max-w-4xl rounded-3xl overflow-hidden border-2 border-amber-400/60 bg-slate-900 shadow-2xl">
+      <div class="relative aspect-video w-full bg-slate-950 flex items-center justify-center overflow-hidden">
+        <img id="lightbox-img" alt="解鎖章節插畫" class="hidden w-full h-full object-cover" />
+        <div id="lightbox-fallback" class="hidden flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-amber-900/50 via-slate-900 to-orange-950/60 w-full h-full">
+          <span id="lightbox-fallback-icon" class="text-6xl mb-3">👑</span>
+          <h3 id="lightbox-fallback-title" class="text-2xl font-black text-amber-300">章節里程碑達成！</h3>
+          <p class="text-xs text-slate-300 mt-1">（可將專屬插畫放入 image/ 資料夾自動展示）</p>
+        </div>
+      </div>
+      <div class="p-4 bg-slate-900/95 flex flex-wrap items-center justify-between gap-3 border-t border-slate-800">
+        <div>
+          <div id="lightbox-chapter-tag" class="text-xs font-mono text-amber-400">CHAPTER 1 · 1～10 關全制霸</div>
+          <div id="lightbox-chapter-title" class="text-base sm:text-lg font-black text-white">草原初啼 · 見習幼獅</div>
+        </div>
+        <button id="close-lightbox-btn" type="button" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm transition cursor-pointer">
+          關閉賞圖
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="relative z-10 w-full max-w-4xl mx-auto px-4 pb-5 text-center text-[11px] text-slate-500">
+    幾何密碼：大草原獅王之路 · 支援手機滑動與桌面點擊遊玩
+  </footer>
+
+  <script>
+    const SAVE_STORAGE_KEY = 'savanna_radical_puzzle_save_v1';
+    const GAME_PAGE_URL = 'game.html';
+    const TOTAL_LEVELS = 50;
+
+    // 5 Chapter Milestones (10 levels each)
+    const CHAPTER_MILESTONES = [
+      { id: 1, start: 1,  end: 10, title: '草原初啼',   rank: '見習幼獅',   icon: '🐾', files: ['image/milestone_10.png', 'image/milestone_10.jpg'] },
+      { id: 2, start: 11, end: 20, title: '迷霧探險',   rank: '荒原獵手',   icon: '🧭', files: ['image/milestone_20.png', 'image/milestone_20.jpg'] },
+      { id: 3, start: 21, end: 30, title: '綠洲守護',   rank: '三角洲衛士', icon: '🌴', files: ['image/milestone_30.png', 'image/milestone_30.jpg'] },
+      { id: 4, start: 31, end: 40, title: '群獅領袖',   rank: '草原統領',   icon: '🔥', files: ['image/milestone_40.png', 'image/milestone_40.jpg'] },
+      { id: 5, start: 41, end: 50, title: '榮耀加冕',   rank: '大草原獅子王', icon: '👑', files: ['image/coronation.png', 'image/coronation.jpg'] }
+    ];
+
+    // Load optional cover & emblem images without broken-image icons
+    function loadOptionalAsset(imgEl, candidates, onLoaded) {
+      let idx = 0;
+      const tryNext = () => {
+        if (idx >= candidates.length) return;
+        const probe = new Image();
+        probe.onload = () => {
+          imgEl.src = candidates[idx];
+          imgEl.classList.remove('hidden');
+          if (onLoaded) onLoaded();
+        };
+        probe.onerror = () => {
+          idx++;
+          tryNext();
+        };
+        probe.src = candidates[idx];
+      };
+      tryNext();
+    }
+
+    loadOptionalAsset(document.getElementById('cover-bg-img'), ['image/cover.png', 'image/cover.jpg']);
+    loadOptionalAsset(document.getElementById('brand-mark-img'), ['image/mark.png', 'image/mark.jpg'], () => {
+      document.getElementById('brand-mark-fallback').classList.add('hidden');
+    });
+
+    function readSaveData() {
+      try {
+        const raw = localStorage.getItem(SAVE_STORAGE_KEY);
+        if (!raw) return { currentLevel: 1, stars: {} };
+        const parsed = JSON.parse(raw);
+        return {
+          currentLevel: Math.min(TOTAL_LEVELS, Math.max(1, Number(parsed.currentLevel) || 1)),
+          stars: (parsed.stars && typeof parsed.stars === 'object') ? parsed.stars : {}
+        };
+      } catch (e) {
+        return { currentLevel: 1, stars: {} };
+      }
+    }
+
+    function navigateWithFreshCache(targetUrl) {
+      try {
+        sessionStorage.setItem('savanna_entered_from_home', '1');
+      } catch (e) {}
+      const separator = targetUrl.includes('?') ? '&' : '?';
+      window.location.assign(`${targetUrl}${separator}t=${Date.now()}`);
+    }
+
+    function openChapterLightbox(chapter) {
+      const lightbox = document.getElementById('gallery-lightbox');
+      const imgEl = document.getElementById('lightbox-img');
+      const fallbackEl = document.getElementById('lightbox-fallback');
+
+      document.getElementById('lightbox-chapter-tag').textContent = `CHAPTER ${chapter.id} · 第 ${chapter.start}～${chapter.end} 關全制霸`;
+      document.getElementById('lightbox-chapter-title').textContent = `${chapter.title} · ${chapter.rank}`;
+      document.getElementById('lightbox-fallback-icon').textContent = chapter.icon;
+      document.getElementById('lightbox-fallback-title').textContent = `${chapter.title}（${chapter.rank}）`;
+
+      imgEl.classList.add('hidden');
+      imgEl.removeAttribute('src');
+      fallbackEl.classList.remove('hidden');
+      fallbackEl.classList.add('flex');
+
+      // Only probe and load image when chapter is verified unlocked
+      let idx = 0;
+      const tryLoad = () => {
+        if (idx >= chapter.files.length) return;
+        const probe = new Image();
+        probe.onload = () => {
+          imgEl.src = chapter.files[idx];
+          imgEl.classList.remove('hidden');
+          fallbackEl.classList.add('hidden');
+          fallbackEl.classList.remove('flex');
+        };
+        probe.onerror = () => {
+          idx++;
+          tryLoad();
+        };
+        probe.src = chapter.files[idx];
+      };
+      tryLoad();
+
+      lightbox.classList.remove('hidden');
+    }
+
+    // Gallery Modal Open / Close Controls
+    const galleryModal = document.getElementById('gallery-modal');
+    document.getElementById('open-gallery-btn').addEventListener('click', () => {
+      renderMilestoneGallery(readSaveData().stars);
+      galleryModal.classList.remove('hidden');
+    });
+    document.getElementById('close-gallery-modal-btn').addEventListener('click', () => {
+      galleryModal.classList.add('hidden');
+    });
+    galleryModal.addEventListener('click', (e) => {
+      if (e.target.id === 'gallery-modal') {
+        galleryModal.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('close-lightbox-btn').addEventListener('click', () => {
+      document.getElementById('gallery-lightbox').classList.add('hidden');
+    });
+    document.getElementById('gallery-lightbox').addEventListener('click', (e) => {
+      if (e.target.id === 'gallery-lightbox') {
+        document.getElementById('gallery-lightbox').classList.add('hidden');
+      }
+    });
+
+    function renderMilestoneGallery(starsMap) {
+      const grid = document.getElementById('milestone-gallery-grid');
+      grid.innerHTML = '';
+
+      CHAPTER_MILESTONES.forEach((chapter) => {
+        let clearedInChapter = 0;
+        for (let lv = chapter.start; lv <= chapter.end; lv++) {
+          if (Number(starsMap[lv]) > 0) clearedInChapter++;
+        }
+        const isUnlocked = clearedInChapter === 10;
+
+        const card = document.createElement('button');
+        card.type = 'button';
+
+        if (isUnlocked) {
+          card.className = 'group relative rounded-2xl overflow-hidden border-2 border-amber-400/75 bg-slate-950 aspect-video flex flex-col justify-end text-left shadow-xl hover:scale-[1.02] transition cursor-pointer';
+          card.title = `點擊放大欣賞：${chapter.title}`;
+          card.onclick = () => openChapterLightbox(chapter);
+
+          const thumbImg = document.createElement('img');
+          thumbImg.alt = chapter.title;
+          thumbImg.className = 'hidden absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500';
+          card.appendChild(thumbImg);
+
+          const fallbackBg = document.createElement('div');
+          fallbackBg.className = 'absolute inset-0 bg-gradient-to-br from-amber-600/35 via-orange-900/40 to-slate-950 flex items-center justify-center pb-6';
+          fallbackBg.innerHTML = `<span class="text-4xl drop-shadow">${chapter.icon}</span>`;
+          card.appendChild(fallbackBg);
+
+          // Load thumbnail ONLY because chapter is unlocked
+          loadOptionalAsset(thumbImg, chapter.files, () => {
+            fallbackBg.classList.add('hidden');
+          });
+
+          const caption = document.createElement('div');
+          caption.className = 'relative z-10 w-full bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent px-3.5 py-2.5 flex items-end justify-between gap-2';
+          caption.innerHTML = `
+            <div>
+              <div class="text-[11px] font-mono text-amber-300 leading-tight">CHAPTER ${chapter.id} · 第 ${chapter.end} 關達成</div>
+              <div class="text-sm font-black text-white">${chapter.title} · ${chapter.rank}</div>
+            </div>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200 shrink-0">🔍 賞圖</span>
+          `;
+          card.appendChild(caption);
+        } else {
+          // Strictly locked: do NOT load any image URL at all
+          card.disabled = true;
+          card.className = 'relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950/90 aspect-video flex flex-col items-center justify-center p-4 text-center opacity-80 cursor-not-allowed';
+          card.innerHTML = `
+            <span class="text-2xl mb-1.5 text-slate-500">🔒</span>
+            <div class="text-xs font-bold text-slate-300">CHAPTER ${chapter.id} · 第 ${chapter.start}~${chapter.end} 關</div>
+            <div class="text-[11px] font-mono text-amber-400/80 mt-1">通關進度：${clearedInChapter} / 10 關</div>
+            <div class="w-28 h-1.5 rounded-full bg-slate-800 mt-2 overflow-hidden">
+              <div class="h-full bg-amber-500/70" style="width: ${clearedInChapter * 10}%"></div>
+            </div>
+          `;
+        }
+
+        grid.appendChild(card);
+      });
+    }
+
+    function refreshStartScreen() {
+      const save = readSaveData();
+      const clearedLevels = Object.keys(save.stars).filter(k => Number(save.stars[k]) > 0);
+      const clearedCount = clearedLevels.length;
+      const totalStars = clearedLevels.reduce((sum, k) => sum + Math.min(3, Math.max(0, Number(save.stars[k]) || 0)), 0);
+      const hasProgress = clearedCount > 0 || save.currentLevel > 1;
+
+      // Count unlocked chapters for button badge
+      const unlockedChaptersCount = CHAPTER_MILESTONES.filter(ch => {
+        for (let lv = ch.start; lv <= ch.end; lv++) {
+          if (!(Number(save.stars[lv]) > 0)) return false;
+        }
+        return true;
+      }).length;
+      document.getElementById('gallery-count-badge').textContent = `${unlockedChaptersCount}/${CHAPTER_MILESTONES.length}`;
+
+      document.getElementById('stat-current-level').textContent = `第 ${save.currentLevel} 關`;
+      document.getElementById('stat-cleared-count').textContent = `${clearedCount} / ${TOTAL_LEVELS}`;
+      document.getElementById('stat-total-stars').textContent = `★ ${totalStars} / ${TOTAL_LEVELS * 3}`;
+      document.getElementById('progress-fill-bar').style.width = `${Math.round((clearedCount / TOTAL_LEVELS) * 100)}%`;
+
+      const statusBadge = document.getElementById('save-status-badge');
+      const primaryBtn = document.getElementById('primary-play-btn');
+      const primaryLabel = document.getElementById('primary-play-label');
+      const startNewBtn = document.getElementById('start-new-btn');
+      const resetArea = document.getElementById('reset-area');
+
+      if (clearedCount === TOTAL_LEVELS) {
+        statusBadge.textContent = '👑 全 50 關制霸 · 獅子王';
+        statusBadge.className = 'text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/50';
+        primaryLabel.textContent = `重溫獅子王之旅（第 ${save.currentLevel} 關）`;
+        startNewBtn.classList.remove('hidden');
+        resetArea.classList.remove('hidden');
+      } else if (hasProgress) {
+        statusBadge.textContent = `已存檔 · 進度 ${Math.round((clearedCount / TOTAL_LEVELS) * 100)}%`;
+        statusBadge.className = 'text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        primaryLabel.textContent = `繼續獅王之路（第 ${save.currentLevel} 關）`;
+        startNewBtn.classList.remove('hidden');
+        resetArea.classList.remove('hidden');
+      } else {
+        statusBadge.textContent = '新冒險準備就緒';
+        statusBadge.className = 'text-xs font-mono px-2.5 py-0.5 rounded-full bg-slate-800 text-amber-300 border border-slate-700';
+        primaryLabel.textContent = '開始草原冒險';
+        startNewBtn.classList.add('hidden');
+        resetArea.classList.add('hidden');
+      }
+
+      primaryBtn.onclick = () => {
+        const targetLevel = hasProgress ? save.currentLevel : 1;
+        navigateWithFreshCache(`${GAME_PAGE_URL}?level=${targetLevel}`);
+      };
+
+      startNewBtn.onclick = () => {
+        navigateWithFreshCache(`${GAME_PAGE_URL}?level=1`);
+      };
+
+      renderMilestoneGallery(save.stars);
+    }
+
+    // Two-click safe reset without browser confirm()
+    let armedReset = false;
+    let resetTimer = null;
+    const resetBtn = document.getElementById('reset-save-btn');
+    resetBtn.addEventListener('click', () => {
+      if (!armedReset) {
+        armedReset = true;
+        resetBtn.textContent = '確定清除所有星數與進度？再點一次確認';
+        resetBtn.className = 'text-rose-300 font-bold bg-rose-950/70 px-2.5 py-1 rounded-lg border border-rose-500/50 transition cursor-pointer';
+        clearTimeout(resetTimer);
+        resetTimer = setTimeout(() => {
+          armedReset = false;
+          resetBtn.textContent = '清除本機遊戲紀錄';
+          resetBtn.className = 'text-rose-400/80 hover:text-rose-300 underline underline-offset-2 transition cursor-pointer';
+        }, 4000);
+      } else {
+        clearTimeout(resetTimer);
+        armedReset = false;
+        try {
+          localStorage.removeItem(SAVE_STORAGE_KEY);
+        } catch (e) {}
+        resetBtn.textContent = '清除本機遊戲紀錄';
+        resetBtn.className = 'text-rose-400/80 hover:text-rose-300 underline underline-offset-2 transition cursor-pointer';
+        refreshStartScreen();
+      }
+    });
+
+    window.addEventListener('pageshow', () => {
+      refreshStartScreen();
+    });
+
+    refreshStartScreen();
+  </script>
+</body>
+</html>
