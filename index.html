@@ -157,7 +157,7 @@
           <div id="inline-result-banner" class="rounded-xl p-2.5 sm:p-3 border border-slate-800/90 bg-slate-950/75 transition-colors flex flex-col justify-between gap-1.5 min-h-[86px]">
             <div class="flex items-center justify-between gap-2">
               <span id="inline-result-title" class="text-xs sm:text-sm font-black text-amber-300">🧭 草原探險指引</span>
-              <span id="inline-result-stars" class="text-xs sm:text-sm tracking-wider text-slate-400 font-bold">☆☆☆</span>
+              <span id="inline-result-stars" class="font-mono text-base sm:text-lg tracking-widest font-black"><span class="text-slate-600">★★★</span></span>
             </div>
             <p id="inline-result-desc" class="text-[11px] sm:text-xs leading-snug text-slate-300">
               引導小獅抵達椰子樹，使總長吻合目標密碼；在宗師步數內完成可奪得三星！
@@ -1141,8 +1141,8 @@
       if (opts.win) {
         banner.className = 'rounded-xl p-2.5 sm:p-3 border border-emerald-500/50 bg-emerald-950/65 transition-colors flex flex-col justify-between gap-1.5 min-h-[86px] shadow-lg';
         titleEl.className = 'text-xs sm:text-sm font-black text-emerald-300';
-        starsEl.className = 'text-base sm:text-lg tracking-widest text-amber-400 font-black';
-        starsEl.textContent = '★'.repeat(opts.stars) + '☆'.repeat(3 - opts.stars);
+        starsEl.className = 'font-mono text-base sm:text-lg tracking-widest font-black';
+        starsEl.innerHTML = `<span class="text-amber-400">${'★'.repeat(opts.stars)}</span><span class="text-slate-600">${'★'.repeat(3 - opts.stars)}</span>`;
         nextBtn.disabled = false;
         nextBtn.className = 'w-full py-1.5 px-3 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 transition cursor-pointer';
         nextBtn.textContent = state.currentLevelIndex < LEVELS.length - 1
@@ -1151,8 +1151,8 @@
       } else {
         banner.className = 'rounded-xl p-2.5 sm:p-3 border border-rose-500/50 bg-rose-950/55 transition-colors flex flex-col justify-between gap-1.5 min-h-[86px] shadow-lg';
         titleEl.className = 'text-xs sm:text-sm font-black text-rose-300';
-        starsEl.className = 'text-xs sm:text-sm tracking-wider text-rose-300/80 font-bold';
-        starsEl.textContent = '未過關';
+        starsEl.className = 'font-mono text-base sm:text-lg tracking-widest font-black';
+        starsEl.innerHTML = '<span class="text-rose-900/80">★★★</span>';
         nextBtn.disabled = true;
         nextBtn.className = 'w-full py-1.5 px-3 rounded-lg bg-slate-800/80 text-slate-500 border border-slate-700/60 font-black text-xs sm:text-sm transition disabled:cursor-not-allowed';
         nextBtn.textContent = '請調整路線後再試';
@@ -1171,8 +1171,8 @@
       banner.className = 'rounded-xl p-2.5 sm:p-3 border border-slate-800/90 bg-slate-950/75 transition-colors flex flex-col justify-between gap-1.5 min-h-[86px]';
       titleEl.className = 'text-xs sm:text-sm font-black text-amber-300';
       titleEl.textContent = '🧭 草原探險指引';
-      starsEl.className = 'text-xs sm:text-sm tracking-wider text-slate-400 font-bold';
-      starsEl.textContent = '☆☆☆';
+      starsEl.className = 'font-mono text-base sm:text-lg tracking-widest font-black';
+      starsEl.innerHTML = '<span class="text-slate-600">★★★</span>';
       descEl.textContent = `引導小獅抵達椰子樹並吻合密碼；以 ${optimalSteps} 步內完成可奪得三星宗師！`;
       nextBtn.disabled = true;
       nextBtn.className = 'w-full py-1.5 px-3 rounded-lg bg-slate-800/80 text-slate-500 border border-slate-700/60 font-black text-xs sm:text-sm transition disabled:cursor-not-allowed';
