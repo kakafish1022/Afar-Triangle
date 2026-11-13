@@ -436,13 +436,13 @@
       if (clearedCount === TOTAL_LEVELS) {
         statusBadge.textContent = '👑 全 50 關制霸 · 獅子王';
         statusBadge.className = 'text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/50';
-        primaryLabel.textContent = `重溫獅子王之旅（第 ${save.currentLevel} 關）`;
+        primaryLabel.textContent = '繼續征途';
         startNewBtn.classList.remove('hidden');
         resetArea.classList.remove('hidden');
       } else if (hasProgress) {
         statusBadge.textContent = `已存檔 · 進度 ${Math.round((clearedCount / TOTAL_LEVELS) * 100)}%`;
         statusBadge.className = 'text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
-        primaryLabel.textContent = `繼續獅王之路（第 ${save.currentLevel} 關）`;
+        primaryLabel.textContent = '繼續征途';
         startNewBtn.classList.remove('hidden');
         resetArea.classList.remove('hidden');
       } else {
@@ -464,7 +464,7 @@
 
       const openWebBtn = document.getElementById('open-web-edition-btn');
       if (openWebBtn) {
-        const isDesktopOrLargeTablet = window.innerWidth >= 768;
+        const isDesktopOrLargeTablet = window.innerWidth >= 600;
         if (!isDesktopOrLargeTablet) {
           openWebBtn.disabled = true;
           openWebBtn.className = 'py-3.5 px-4 rounded-xl bg-slate-900/90 border border-slate-700/80 text-slate-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-not-allowed opacity-75';
