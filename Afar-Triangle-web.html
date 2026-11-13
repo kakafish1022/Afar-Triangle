@@ -1,0 +1,112 @@
+<!-- ... existing code ... -->
+    // =========================================================================
+    // 1. STORAGE, ROUTING & ASSET CONFIGURATION (Same-level root directory)
+    // =========================================================================
+    const SAVE_STORAGE_KEY = 'afar_triangle_web_save_v1';
+    const HOME_PAGE_URL = 'index.html';
+    const START_LEVEL = 51;
+    const END_LEVEL = 100;
+    const WEB_LEVEL_COUNT = END_LEVEL - START_LEVEL + 1;
+
+    // Every-10-level chapter milestones for Expedition (Levels 51~100)
+    const EXPEDITION_MILESTONES = [
+      { id: 6,  start: 51, end: 60,  title: '巨石陣試煉',   rank: '遠征先鋒',     icon: '🗿', files: ['image/milestone_60.png', 'image/milestone_60.jpg'] },
+      { id: 7,  start: 61, end: 70,  title: '烈日長征',     rank: '沙海領航者',   icon: '☀️', files: ['image/milestone_70.png', 'image/milestone_70.jpg'] },
+      { id: 8,  start: 71, end: 80,  title: '暴風峽谷',     rank: '雷霆守護者',   icon: '⚡', files: ['image/milestone_80.png', 'image/milestone_80.jpg'] },
+      { id: 9,  start: 81, end: 90,  title: '星辰王庭',     rank: '大草原賢者',   icon: '🌌', files: ['image/milestone_90.png', 'image/milestone_90.jpg'] },
+      { id: 10, start: 91, end: 100, title: '永恆獅皇傳說', rank: '非洲大陸霸主', icon: '👑', files: ['image/coronation_100.png', 'image/coronation_100.jpg'] }
+    ];
+
+    // Enforce entry from home page on cold reopen / incognito pasted link
+    (function enforceHomeEntry() {
+      try {
+        const fromHome = sessionStorage.getItem('savanna_entered_from_home') === '1';
+        if (!fromHome) {
+          window.location.replace(`${HOME_PAGE_URL}?t=${Date.now()}`);
+        }
+      } catch (e) {}
+    })();
+
+    function checkScreenSupport() {
+      const blocker = document.getElementById('mobile-guard-overlay');
+      const mainContainer = document.getElementById('main-game-container');
+      const isSupported = window.innerWidth >= 768;
+      if (!isSupported) {
+        blocker.classList.remove('hidden');
+        mainContainer.classList.add('hidden');
+      } else {
+        blocker.classList.add('hidden');
+        mainContainer.classList.remove('hidden');
+      }
+      return isSupported;
+    }
+
+    document.getElementById('guard-go-mobile-btn').addEventListener('click', () => {
+      try {
+        sessionStorage.setItem('savanna_entered_from_home', '1');
+      } catch (e) {}
+      window.location.assign(`Afar-Triangle.html?t=${Date.now()}`);
+    });
+
+    document.getElementById('guard-go-home-btn').addEventListener('click', () => {
+      window.location.assign(`${HOME_PAGE_URL}?t=${Date.now()}`);
+    });
+
+    // Optional sprite images in root image/ folder
+    const SPRITES = {
+      lion: null,
+      palm: null,
+      rock: null,
+      lake: null
+    };
+
+    function loadSprite(key, candidates) {
+      let idx = 0;
+      const tryNext = () => {
+        if (idx >= candidates.length) return;
+        const img = new Image();
+        img.onload = () => {
+          SPRITES[key] = img;
+          drawBoard();
+        };
+        img.onerror = () => {
+          idx++;
+          tryNext();
+        };
+        img.src = candidates[idx];
+      };
+      tryNext();
+    }
+
+    loadSprite('lion', ['image/lion.png', 'image/lion.jpg']);
+    loadSprite('palm', ['image/palm.png', 'image/palm.jpg']);
+    loadSprite('rock', ['image/rock.png', 'image/rock.jpg']);
+    loadSprite('lake', ['image/lake.png', 'image/lake.jpg']);
+<!-- ... existing code ... -->
+    function openCoronationScreen() {
+      const overlay = document.getElementById('coronation-overlay');
+      const imgEl = document.getElementById('coronation-img');
+      const fallbackEl = document.getElementById('coronation-fallback');
+
+      const candidates = ['image/coronation_100.png', 'image/coronation_100.jpg', 'image/coronation.png'];
+      let idx = 0;
+      const tryLoad = () => {
+        if (idx >= candidates.length) return;
+        const probe = new Image();
+        probe.onload = () => {
+          imgEl.src = candidates[idx];
+          imgEl.classList.remove('hidden');
+          fallbackEl.classList.add('hidden');
+        };
+        probe.onerror = () => {
+          idx++;
+          tryLoad();
+        };
+        probe.src = candidates[idx];
+      };
+      tryLoad();
+
+      overlay.classList.remove('hidden');
+      startConfettiCelebration();
+    }
+<!-- ... existing code ... -->
