@@ -39,18 +39,18 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between bg-[radial-gradient(circle_at_50%_0%,rgba(245,158,11,0.14),rgba(9,13,22,0.98)_65%)] select-none overflow-x-hidden">
+<body class="h-[100dvh] max-h-[100dvh] flex flex-col justify-between bg-[radial-gradient(circle_at_50%_0%,rgba(245,158,11,0.14),rgba(9,13,22,0.98)_65%)] select-none overflow-hidden">
 
   <!-- Top Navigation & Status Header -->
-  <header class="w-full max-w-4xl mx-auto px-3 sm:px-5 pt-3 pb-2 flex flex-col gap-2">
+  <header class="w-full max-w-4xl mx-auto px-3 sm:px-5 pt-2 pb-1 flex flex-col gap-1.5 shrink-0">
     <div class="flex items-center justify-between gap-2">
       <!-- Brand & Back to Home -->
       <div class="flex items-center gap-2">
-        <button id="home-btn" type="button" class="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-amber-500/40 text-amber-200 font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow transition active:scale-95 cursor-pointer">
+        <button id="home-btn" type="button" class="px-2.5 py-1 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-amber-500/40 text-amber-200 font-bold text-xs flex items-center gap-1 shadow transition active:scale-95 cursor-pointer">
           <span>🏠</span>
           <span>主畫面</span>
         </button>
-        <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/70 border border-slate-800 text-xs font-black tracking-wider text-amber-300">
+        <div class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-950/70 border border-slate-800 text-xs font-black tracking-wider text-amber-300">
           <span>◈</span>
           <span>貳餘 · AFAR-TRIANGLE</span>
         </div>
@@ -58,7 +58,7 @@
 
       <!-- Current Level Badge & Total Progress -->
       <div class="flex items-center gap-2">
-        <div class="px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-xs font-mono text-slate-200 flex items-center gap-2">
+        <div class="px-2.5 py-1 rounded-xl bg-slate-900/90 border border-slate-700/80 text-xs font-mono text-slate-200 flex items-center gap-1.5">
           <span id="header-level-label" class="font-black text-amber-300">第 1 / 50 關</span>
           <span class="text-slate-600">|</span>
           <span id="header-total-stars" class="text-yellow-400 font-bold">★ 0 / 150</span>
@@ -67,46 +67,46 @@
     </div>
 
     <!-- Horizontal 50-Level Selector Strip -->
-    <div id="level-strip" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-0.5">
+    <div id="level-strip" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 px-0.5">
       <!-- Populated dynamically by JS -->
     </div>
   </header>
 
-  <!-- Main Puzzle Container -->
-  <main class="w-full max-w-4xl mx-auto px-3 sm:px-5 flex-1 flex flex-col items-center justify-center gap-2.5 py-1">
+  <!-- Main Puzzle Container (Fits 100% inside mobile viewport without scrolling) -->
+  <main class="w-full max-w-4xl mx-auto px-3 sm:px-5 flex-1 min-h-0 flex flex-col items-center justify-evenly gap-1.5 py-1">
 
     <!-- Mission Equation & Step HUD Card -->
-    <div class="w-full rounded-2xl bg-slate-900/85 border border-slate-700/80 backdrop-blur-md px-3.5 py-2.5 sm:px-5 sm:py-3 shadow-xl flex flex-wrap items-center justify-between gap-2">
+    <div class="w-full rounded-2xl bg-slate-900/85 border border-slate-700/80 backdrop-blur-md px-3 py-1.5 sm:px-5 sm:py-2.5 shadow-xl flex flex-wrap items-center justify-between gap-1.5 shrink-0">
       <!-- Target vs Current Radical Expression -->
-      <div class="flex items-center gap-2.5 sm:gap-4">
+      <div class="flex items-center gap-2 sm:gap-4">
         <div class="flex flex-col">
           <span class="text-[10px] sm:text-xs text-slate-400 font-bold tracking-wider">石碑目標密碼</span>
-          <div id="target-formula" class="text-lg sm:text-2xl font-black text-amber-300 font-mono tracking-tight">
+          <div id="target-formula" class="text-base sm:text-2xl font-black text-amber-300 font-mono tracking-tight leading-tight">
             √2 + 1
           </div>
         </div>
-        <span class="text-slate-600 text-lg font-bold">⇄</span>
+        <span class="text-slate-600 text-base font-bold">⇄</span>
         <div class="flex flex-col">
           <span class="text-[10px] sm:text-xs text-slate-400 font-bold tracking-wider">目前累計步距</span>
-          <div id="current-formula" class="text-lg sm:text-2xl font-black text-emerald-300 font-mono tracking-tight">
+          <div id="current-formula" class="text-base sm:text-2xl font-black text-emerald-300 font-mono tracking-tight leading-tight">
             0
           </div>
         </div>
       </div>
 
       <!-- Step Counter & Uniform-Size 3-Star Indicator -->
-      <div class="flex items-center gap-3 ml-auto">
+      <div class="flex items-center gap-2 sm:gap-3 ml-auto">
         <div class="text-right">
-          <div class="text-[10px] sm:text-xs text-slate-400">已走步數 / 上限</div>
-          <div class="text-sm sm:text-base font-black font-mono text-slate-100">
+          <div class="text-[10px] sm:text-xs text-slate-400 leading-tight">已走步數 / 上限</div>
+          <div class="text-xs sm:text-base font-black font-mono text-slate-100 leading-tight">
             <span id="steps-used" class="text-amber-300">0</span>
             <span class="text-slate-500"> / </span>
             <span id="steps-limit">4</span>
-            <span class="text-[11px] text-slate-400 ml-1">(宗師 <span id="steps-optimal" class="text-emerald-400">2</span> 步)</span>
+            <span class="text-[10px] sm:text-[11px] text-slate-400 ml-0.5">(宗師 <span id="steps-optimal" class="text-emerald-400">2</span> 步)</span>
           </div>
         </div>
         <!-- Fixed-size equal-width solid stars (only color changes, never jumps in size) -->
-        <div id="hud-stars" class="px-2.5 py-1 rounded-xl bg-slate-950/90 border border-slate-800 text-base sm:text-lg font-mono tracking-widest flex items-center" title="三星評價：宗師步數3星、宗師+1步2星、通關1星">
+        <div id="hud-stars" class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl bg-slate-950/90 border border-slate-800 text-sm sm:text-lg font-mono tracking-widest flex items-center" title="三星評價：宗師步數3星、宗師+1步2星、通關1星">
           <span id="hud-star-1" class="text-slate-600 transition-colors duration-300">★</span>
           <span id="hud-star-2" class="text-slate-600 transition-colors duration-300">★</span>
           <span id="hud-star-3" class="text-slate-600 transition-colors duration-300">★</span>
@@ -115,37 +115,37 @@
     </div>
 
     <!-- Inline Guidance / Clear Banner -->
-    <div id="status-banner" class="w-full rounded-2xl bg-slate-900/75 border border-slate-700/70 px-3.5 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm">
-      <div id="status-message" class="text-slate-200 font-medium text-center sm:text-left leading-relaxed">
+    <div id="status-banner" class="w-full rounded-2xl bg-slate-900/75 border border-slate-700/70 px-3 py-1.5 sm:px-3.5 sm:py-2 flex flex-col sm:flex-row items-center justify-between gap-1.5 text-[11px] sm:text-sm shrink-0">
+      <div id="status-message" class="text-slate-200 font-medium text-center sm:text-left leading-snug">
         引導小獅抵達椰子樹並吻合密碼；若小獅子以 2 步內完成可奪得三星宗師！
       </div>
       <div id="banner-action-group" class="hidden flex items-center gap-2 shrink-0">
-        <button id="next-action-btn" type="button" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition transform active:scale-95 cursor-pointer">
+        <button id="next-action-btn" type="button" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition transform active:scale-95 cursor-pointer">
           前往下一關 ➔
         </button>
       </div>
     </div>
 
-    <!-- Responsive Savanna Geometry Canvas Wrapper -->
-    <div id="canvas-wrapper" class="relative w-full max-w-[520px] aspect-square rounded-3xl overflow-hidden border-2 border-amber-500/35 bg-slate-950 shadow-2xl">
+    <!-- Responsive Savanna Geometry Canvas Wrapper (Viewport-Height Capped) -->
+    <div id="canvas-wrapper" style="width: min(86vw, 43dvh, 410px); height: min(86vw, 43dvh, 410px);" class="relative aspect-square rounded-3xl overflow-hidden border-2 border-amber-500/35 bg-slate-950 shadow-2xl shrink-0">
       <canvas id="board-canvas" class="w-full h-full block"></canvas>
       <!-- Subtle Mobile Drag Hint Pill -->
-      <div class="pointer-events-none absolute bottom-2.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-slate-950/75 border border-slate-700/70 text-[11px] text-slate-300 whitespace-nowrap backdrop-blur-sm">
-        💡 手機可直接按住小獅滑動連線，往回滑可退一步
+      <div class="pointer-events-none absolute bottom-1.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-slate-950/75 border border-slate-700/70 text-[10px] text-slate-300 whitespace-nowrap backdrop-blur-sm">
+        💡 手機可直接按住小獅滑動連線，往回滑退一步
       </div>
     </div>
 
-    <!-- Bottom Action Controls (Outside Canvas) -->
-    <div class="w-full max-w-[520px] grid grid-cols-3 gap-2.5 pt-0.5 pb-2">
-      <button id="undo-btn" type="button" class="py-3 px-3 rounded-2xl bg-slate-800/95 hover:bg-slate-700 disabled:opacity-40 border border-slate-600/80 text-slate-100 font-bold text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+    <!-- Bottom Action Controls (Guaranteed Visible on Mobile Without Scrolling) -->
+    <div class="w-full max-w-[440px] grid grid-cols-3 gap-2 pb-1.5 shrink-0">
+      <button id="undo-btn" type="button" class="py-2.5 px-2.5 rounded-2xl bg-slate-800/95 hover:bg-slate-700 disabled:opacity-40 border border-slate-600/80 text-slate-100 font-bold text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-1 cursor-pointer">
         <span>↩️</span>
         <span>退回一步</span>
       </button>
-      <button id="reset-level-btn" type="button" class="py-3 px-3 rounded-2xl bg-slate-800/95 hover:bg-slate-700 border border-slate-600/80 text-amber-200 font-bold text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+      <button id="reset-level-btn" type="button" class="py-2.5 px-2.5 rounded-2xl bg-slate-800/95 hover:bg-slate-700 border border-slate-600/80 text-amber-200 font-bold text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-1 cursor-pointer">
         <span>🔄</span>
         <span>重走本關</span>
       </button>
-      <button id="hint-btn" type="button" class="py-3 px-3 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 font-bold text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+      <button id="hint-btn" type="button" class="py-2.5 px-2.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 font-bold text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-1 cursor-pointer">
         <span>🧭</span>
         <span>宗師提示</span>
       </button>
@@ -219,11 +219,11 @@
     const TOTAL_LEVELS = 50;
 
     // Enforce entry from home page on cold reopen so mobile session restore never traps user
+    // Enforce entry from home page on cold reopen / incognito pasted link
     (function enforceHomeEntry() {
       try {
-        const params = new URLSearchParams(window.location.search);
         const fromHome = sessionStorage.getItem('savanna_entered_from_home') === '1';
-        if (!fromHome && !params.has('level')) {
+        if (!fromHome) {
           window.location.replace(`${HOME_PAGE_URL}?t=${Date.now()}`);
         }
       } catch (e) {}
@@ -387,24 +387,23 @@
       return a || 1;
     }
 
-    // Generate all 50 levels deterministically with valid optimal solution paths
+    // Generate all 50 levels deterministically on a mobile-friendly 4x4 grid
+    // Difficulty scales via winding multi-step detours (2 to 6 steps) & obstacles
     const LEVELS = [];
 
     (function buildAllLevels() {
       for (let lv = 1; lv <= TOTAL_LEVELS; lv++) {
         const rng = createSeededRng(2026000 + lv * 7919);
 
-        // Grid size scales smoothly from 4x4 up to 7x7
-        let gridSize = 4;
-        if (lv >= 11 && lv <= 22) gridSize = 5;
-        else if (lv >= 23 && lv <= 38) gridSize = 6;
-        else if (lv >= 39) gridSize = 7;
+        // Keep comfortable 4x4 grid across all 50 levels for crisp mobile & desktop touch
+        const gridSize = 4;
 
-        // Optimal steps scale from 2 up to 5
+        // Optimal steps scale from 2 up to 6 for rich detour puzzles on 4x4
         let optimalSteps = 2;
-        if (lv >= 8 && lv <= 18) optimalSteps = 3;
-        else if (lv >= 19 && lv <= 36) optimalSteps = 4;
-        else if (lv >= 37) optimalSteps = 5;
+        if (lv >= 7 && lv <= 16) optimalSteps = 3;
+        else if (lv >= 17 && lv <= 30) optimalSteps = 4;
+        else if (lv >= 31 && lv <= 42) optimalSteps = 5;
+        else if (lv >= 43) optimalSteps = 6;
 
         let built = null;
 
@@ -453,10 +452,10 @@
           const targetTerms = computePathRadicalMap(path);
           if (areRadicalMapsEqual(directTerms, targetTerms)) continue;
 
-          // Place Savanna Obstacles (Rocks & Lakes) on unused nodes
+          // Place Savanna Obstacles (Rocks & Lakes) on unused nodes (up to 4)
           const maxObstacles = Math.min(
-            Math.floor(gridSize * gridSize * 0.24),
-            Math.floor((lv - 1) / 4) + 1
+            4,
+            Math.floor((lv - 1) / 8) + 1
           );
           const obstacles = [];
           const blockedSet = new Set();
