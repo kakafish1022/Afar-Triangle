@@ -611,38 +611,62 @@
       }, 0);
     }
 
+    function getMaxUnlockedLevel() {
+      let maxUnlocked = START_LEVEL;
+      for (let lv = START_LEVEL; lv < END_LEVEL; lv++) {
+        if ((Number(saveState.stars[lv]) || 0) > 0) {
+          maxUnlocked = lv + 1;
+        } else {
+          break;
+        }
+      }
+      return Math.max(maxUnlocked, Math.min(END_LEVEL, Number(saveState.currentLevel) || START_LEVEL));
+    }
+
     function renderLevelStrip() {
       const strip = document.getElementById('level-strip');
       strip.innerHTML = '';
+      const maxUnlocked = getMaxUnlockedLevel();
 
       for (let lv = START_LEVEL; lv <= END_LEVEL; lv++) {
         const cfg = getLevelConfig(lv);
         const earned = Math.min(3, Math.max(0, Number(saveState.stars[lv]) || 0));
         const isCurrent = lv === currentLevelNum;
+        const isUnlocked = lv <= maxUnlocked;
 
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.dataset.level = lv;
 
-        let baseStyle = 'shrink-0 px-2.5 py-1.5 rounded-xl border text-xs font-mono transition flex flex-col items-center justify-center min-w-[58px] cursor-pointer ';
-        if (isCurrent) {
-          baseStyle += 'bg-emerald-500/25 border-emerald-400 text-emerald-200 font-black shadow-md scale-105';
-        } else if (earned > 0) {
-          baseStyle += 'bg-slate-900/90 border-amber-500/40 text-amber-300 hover:bg-slate-800';
+        if (!isUnlocked) {
+          btn.disabled = true;
+          btn.className = 'shrink-0 px-2.5 py-1.5 rounded-xl border border-slate-800/80 bg-slate-950/60 text-slate-600 text-xs font-mono flex flex-col items-center justify-center min-w-[58px] opacity-55 cursor-not-allowed';
+          btn.title = `請先通過第 ${lv - 1} 關解鎖`;
+          btn.innerHTML = `
+            <span class="leading-none">${lv} <span class="text-[10px]">🔒</span></span>
+            <span class="text-[10px] leading-tight mt-0.5 text-slate-700">未解鎖</span>
+          `;
         } else {
-          baseStyle += 'bg-slate-950/80 border-slate-800 text-slate-400 hover:bg-slate-900';
+          let baseStyle = 'shrink-0 px-2.5 py-1.5 rounded-xl border text-xs font-mono transition flex flex-col items-center justify-center min-w-[58px] cursor-pointer ';
+          if (isCurrent) {
+            baseStyle += 'bg-emerald-500/25 border-emerald-400 text-emerald-200 font-black shadow-md scale-105';
+          } else if (earned > 0) {
+            baseStyle += 'bg-slate-900/90 border-amber-500/40 text-amber-300 hover:bg-slate-800';
+          } else {
+            baseStyle += 'bg-slate-950/80 border-slate-700 text-slate-300 hover:bg-slate-900';
+          }
+          btn.className = baseStyle;
+
+          const starsHtml = [1, 2, 3].map(idx =>
+            `<span class="${idx <= earned ? 'text-amber-400' : 'text-slate-600'}">★</span>`
+          ).join('');
+
+          btn.innerHTML = `
+            <span class="leading-none">${lv} <span class="text-[10px] opacity-75">${cfg.gridSize}×</span></span>
+            <span class="text-[10px] leading-tight mt-0.5 tracking-tighter">${starsHtml}</span>
+          `;
+          btn.onclick = () => loadLevel(lv);
         }
-        btn.className = baseStyle;
-
-        const starsHtml = [1, 2, 3].map(idx =>
-          `<span class="${idx <= earned ? 'text-amber-400' : 'text-slate-600'}">★</span>`
-        ).join('');
-
-        btn.innerHTML = `
-          <span class="leading-none">${lv} <span class="text-[10px] opacity-75">${cfg.gridSize}×</span></span>
-          <span class="text-[10px] leading-tight mt-0.5 tracking-tighter">${starsHtml}</span>
-        `;
-        btn.onclick = () => loadLevel(lv);
         strip.appendChild(btn);
       }
 
@@ -678,7 +702,8 @@
     }
 
     function loadLevel(lvNum) {
-      currentLevelNum = Math.min(END_LEVEL, Math.max(START_LEVEL, lvNum));
+      const maxUnlocked = getMaxUnlockedLevel();
+      currentLevelNum = Math.min(maxUnlocked, Math.max(START_LEVEL, lvNum));
       const cfg = getLevelConfig(currentLevelNum);
 
       saveState.currentLevel = currentLevelNum;
